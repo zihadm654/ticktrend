@@ -4,7 +4,7 @@ import {
   products,
   productVariants,
   productImages,
-  productNotes,
+  productFeatures,
   orderItems,
   orders,
 } from "@/db/schema";
@@ -14,7 +14,7 @@ export async function saveProductRecord(
   id: string | undefined,
   input: unknown,
 ) {
-  const { variants, images, notes, ...values } = productSchema.parse(input);
+  const { variants, images, featureIds, ...values } = productSchema.parse(input);
   return db.transaction(async (tx) => {
     const existing = id
       ? (
@@ -113,11 +113,19 @@ export async function saveProductRecord(
             productId: product.id,
           })),
         );
-    await tx.delete(productNotes).where(eq(productNotes.productId, product.id));
-    if (notes.length)
+    await tx
+      .delete(productFeatures)
+      .where(eq(productFeatures.productId, product.id));
+    const uniqueFeatures = [...new Set(featureIds)];
+    if (uniqueFeatures.length)
       await tx
-        .insert(productNotes)
-        .values(notes.map((v) => ({ ...v, productId: product.id })));
+        .insert(productFeatures)
+        .values(
+          uniqueFeatures.map((featureId) => ({
+            productId: product.id,
+            featureId,
+          })),
+        );
     return product.id;
   });
 }

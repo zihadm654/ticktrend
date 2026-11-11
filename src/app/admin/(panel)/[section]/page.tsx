@@ -55,7 +55,7 @@ const titles: Record<string, string> = {
 };
 const descriptions: Record<string, string> = {
   brands: "The houses you stock. Featured brands appear in the homepage strip.",
-  notes: "Scent notes shoppers filter by, grouped into families.",
+  features: "Grouped features shoppers filter by, from display to strap.",
   collections: "Saved filters that power curated collection pages.",
   banners: "Announcements, hero slides, event cards and promo strips. Drag to set their order.",
   homepage: "The storefront homepage, top to bottom. Drag sections to rearrange.",
@@ -64,7 +64,7 @@ const descriptions: Record<string, string> = {
 };
 const singular: Record<Entity, string> = {
   brands: "brand",
-  notes: "note",
+  features: "feature",
   collections: "collection",
   banners: "banner",
   homepage: "section",
@@ -224,7 +224,7 @@ export default async function Section({
     section === "taxonomy"
       ? p.tab === "collections"
         ? "collections"
-        : "notes"
+        : "features"
       : (section as Entity);
   const base = `/admin/${section}${section === "taxonomy" ? `?tab=${entity}` : ""}`;
   const href = (id: string) =>
@@ -235,11 +235,11 @@ export default async function Section({
       .select()
       .from(s.brands)
       .orderBy(asc(s.brands.sortOrder), asc(s.brands.name));
-  if (entity === "notes")
+  if (entity === "features")
     rows = await db
       .select()
-      .from(s.notes)
-      .orderBy(asc(s.notes.group), asc(s.notes.name));
+      .from(s.features)
+      .orderBy(asc(s.features.group), asc(s.features.name));
   if (entity === "collections")
     rows = await db
       .select()
@@ -469,7 +469,7 @@ export default async function Section({
       <LinkTabs
         label="Taxonomy"
         tabs={[
-          { href: "/admin/taxonomy", label: "Notes", current: entity === "notes" },
+          { href: "/admin/taxonomy", label: "Features", current: entity === "features" },
           { href: "/admin/taxonomy?tab=collections", label: "Collections", current: entity === "collections" },
         ]}
       />
@@ -495,7 +495,7 @@ export default async function Section({
     return (
       <>
         <PageHeader
-          crumbs={[[section === "taxonomy" ? (entity === "notes" ? "Notes" : "Collections") : titles[section], base]]}
+          crumbs={[[section === "taxonomy" ? (entity === "features" ? "Features" : "Collections") : titles[section], base]]}
           title={name}
           description={selected && typeof selected.updatedAt !== "undefined" ? `Last updated ${formatDate(new Date(String(selected.updatedAt)))}` : `Create a ${singular[entity]}.`}
           actions={
@@ -559,7 +559,7 @@ export default async function Section({
       />
     </div>
   );
-  if (entity === "notes") {
+  if (entity === "features") {
     const groups = [...new Set(rows.map((r) => String(r.group)))];
     return (
       <>
@@ -570,7 +570,7 @@ export default async function Section({
             {groups.map((g) => {
               const inGroup = rows.filter((r) => r.group === g);
               return (
-                <Panel key={g} title={humanize(g)} description={`${inGroup.length} notes`} className="admin-note-group">
+                <Panel key={g} title={humanize(g)} description={`${inGroup.length} features`} className="admin-note-group">
                   <div className="admin-chips">
                     {inGroup.map((r) => (
                       <Link key={String(r.id)} href={href(String(r.id))} className="admin-chip link">

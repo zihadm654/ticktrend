@@ -360,7 +360,7 @@ export default async function Dashboard() {
                         {v.product.name}
                       </Link>
                       <small>
-                        {v.product.brand.name} · {v.sizeLabel ?? `${v.sizeMl} ml`}
+                        {v.product.brand.name} · {v.optionLabel ?? "Standard option"}
                       </small>
                     </span>
                     <span className="admin-tag" data-tone={v.stockQuantity === 0 ? "bad" : "warn"}>

@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Eye, EyeOff, Package, Plus, Star, X } from "lucide-react";
 import { productFlags } from "@/lib/admin/actions";
+import { label } from "@/lib/catalog/labels";
 import { formatMoney } from "@/lib/money";
 import { storeConfig } from "../../../store.config";
 type Row = {
   id: string;
   name: string;
   brand: string;
-  concentration: string;
+  movement: string;
+  caseSizeMm: number | null;
   isActive: boolean;
   isFeatured: boolean;
   image: string | null;
@@ -35,7 +37,7 @@ function Price({ r }: { r: Row }) {
     <>
       {r.min === r.max ? formatMoney(r.min) : `${formatMoney(r.min)} – ${formatMoney(r.max)}`}
       <small>
-        {r.variants} {r.variants === 1 ? "size" : "sizes"}
+        {r.variants} {r.variants === 1 ? "option" : "options"}
       </small>
     </>
   );
@@ -126,7 +128,8 @@ export function ProductList({ rows }: { rows: Row[] }) {
                         {r.name}
                       </Link>
                       <small>
-                        {r.brand} · {r.concentration.toUpperCase()}
+                        {r.brand} · {label(r.movement)}
+                        {r.caseSizeMm ? ` · ${r.caseSizeMm} mm` : ""}
                       </small>
                     </span>
                   </span>

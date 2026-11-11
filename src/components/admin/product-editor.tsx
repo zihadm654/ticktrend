@@ -14,13 +14,12 @@ import {
   Plus,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 import { saveProduct } from "@/lib/admin/actions";
 import type { ActionResult, ProductInput } from "@/lib/admin/schema";
+import { label as displayLabel } from "@/lib/catalog/labels";
 import { formatMoney } from "@/lib/money";
 import { slugify } from "@/lib/slug";
-import { humanize } from "@/lib/admin/format";
 import {
   ChipChoice,
   FieldError,
@@ -31,17 +30,16 @@ import {
   useUnsavedGuard,
 } from "./fields";
 import { Combobox } from "./combobox";
-import { InlineCreate, type Choices } from "./entity-editor";
+import type { Choices } from "./entity-editor";
 import { PageHeader, Panel } from "./ui";
 import { storeConfig } from "../../../store.config";
 const blankVariant = () => ({
   sku: "",
-  sizeMl: 100,
-  sizeLabel: "100 ml",
+  optionLabel: "",
   retailPrice: 0,
   price: 0,
   stockQuantity: 0,
-  barcode: null,
+  barcode: null as string | null,
   isDefault: false,
   isActive: true,
 });
@@ -52,10 +50,17 @@ const empty: ProductInput = {
   collectionName: null,
   description: "",
   gender: "unisex",
-  concentration: "edp",
-  packaging: "standard",
-  fragranceFamily: null,
-  perfumer: null,
+  condition: "new",
+  movement: "quartz",
+  style: null,
+  caseSizeMm: null,
+  caseMaterial: null,
+  strapType: null,
+  glass: null,
+  waterResistanceM: null,
+  dialColor: null,
+  referenceNo: null,
+  warrantyMonths: null,
   launchYear: null,
   countryOfOrigin: null,
   groundShippingOnly: false,
@@ -63,17 +68,38 @@ const empty: ProductInput = {
   isActive: true,
   variants: [{ ...blankVariant(), isDefault: true }],
   images: [],
-  notes: [],
+  featureIds: [],
 };
-const TABS = ["Basics", "Variants", "Images", "Notes"] as const;
+const TABS = ["Basics", "Options", "Images", "Features"] as const;
 type Tab = (typeof TABS)[number];
-const CONCENTRATIONS = ["edt", "edp", "parfum", "extrait", "edc", "oil", "attar"] as const;
-const PACKAGING = ["standard", "tester", "sample", "mini", "gift_set"] as const;
 const GENDERS = ["men", "women", "unisex"] as const;
-const POSITIONS = [
-  ["top", "Top notes", "First impression, the first 15 minutes"],
-  ["heart", "Heart notes", "The character once it settles"],
-  ["base", "Base notes", "What lingers for hours"],
+const CONDITIONS = ["new", "open_box", "refurbished", "used"] as const;
+const MOVEMENTS = [
+  "quartz",
+  "automatic",
+  "mechanical",
+  "solar",
+  "digital",
+  "smart",
+] as const;
+const STYLES = ["dress", "sport", "casual", "digital"] as const;
+const CASE_MATERIALS = [
+  "stainless_steel",
+  "alloy",
+  "titanium",
+  "ceramic",
+  "gold_plated",
+  "plastic",
+] as const;
+const STRAPS = ["leather", "steel", "mesh", "rubber", "silicone", "fabric"] as const;
+const GLASSES = ["mineral", "sapphire", "acrylic"] as const;
+const FEATURE_GROUPS = [
+  "display",
+  "complications",
+  "durability",
+  "movement",
+  "case",
+  "strap",
 ] as const;
 function slug(value: string) {
   try {
@@ -83,9 +109,9 @@ function slug(value: string) {
   }
 }
 function tabOf(key: string): Tab {
-  if (key.startsWith("variants")) return "Variants";
+  if (key.startsWith("variants")) return "Options";
   if (key.startsWith("images")) return "Images";
-  if (key.startsWith("notes")) return "Notes";
+  if (key.startsWith("featureIds")) return "Features";
   return "Basics";
 }
 export function ProductEditor({
@@ -127,6 +153,14 @@ export function ProductEditor({
             : v,
       ),
     }));
+  }
+  function toggleFeature(featureId: string, on: boolean) {
+    set(
+      "featureIds",
+      on
+        ? [...data.featureIds.filter((v) => v !== featureId), featureId]
+        : data.featureIds.filter((v) => v !== featureId),
+    );
   }
   function moveImage(from: number, to: number) {
     if (to < 0 || to >= data.images.length) return;
@@ -194,9 +228,9 @@ export function ProductEditor({
   const stock = activeVariants.reduce((sum, v) => sum + (v.stockQuantity || 0), 0);
   const counts: Record<Tab, number | undefined> = {
     Basics: undefined,
-    Variants: data.variants.length,
+    Options: data.variants.length,
     Images: data.images.length,
-    Notes: data.notes.length,
+    Features: data.featureIds.length,
   };
   const currency = storeConfig.currency.symbol;
   const actions = (
@@ -228,7 +262,7 @@ export function ProductEditor({
     <div className="admin-editor">
       <PageHeader
         crumbs={[["Products", "/admin/products"]]}
-        title={id ? data.name || "Untitled product" : "Add new product"}
+        title={id ? data.name || "Untitled product" : "Add new watch"}
         description={
           id ? (
             <span className="admin-inline">
@@ -238,7 +272,7 @@ export function ProductEditor({
               {brand?.name}
             </span>
           ) : (
-            "Fill in the basics, add at least one size, then publish."
+            "Fill in the basics, add at least one option, then publish."
           )
         }
         actions={actions}
@@ -271,7 +305,7 @@ export function ProductEditor({
                     <input
                       value={data.name}
                       maxLength={500}
-                      placeholder="e.g. Cedar Interval"
+                      placeholder="e.g. Harbor Meridian"
                       aria-invalid={Boolean(errors.name)}
                       onChange={(e) => set("name", e.target.value)}
                     />
@@ -298,22 +332,99 @@ export function ProductEditor({
                   <FieldError error={errors.description} />
                 </div>
               </Panel>
-              <Panel title="Attributes" description="Shoppers filter the catalog by these.">
+              <Panel title="Specifications" description="Shoppers filter the catalog by these.">
                 <div className="admin-form">
-                  <ChipChoice label="Gender" value={data.gender} options={GENDERS} onChange={(v) => set("gender", v)} format={humanize} />
-                  <ChipChoice
-                    label="Concentration"
-                    value={data.concentration}
-                    options={CONCENTRATIONS}
-                    onChange={(v) => set("concentration", v)}
-                    format={(v) => (["oil", "attar", "parfum", "extrait"].includes(v) ? humanize(v) : v.toUpperCase())}
-                  />
-                  <ChipChoice label="Packaging" value={data.packaging} options={PACKAGING} onChange={(v) => set("packaging", v)} format={humanize} />
+                  <ChipChoice label="Gender" value={data.gender} options={GENDERS} onChange={(v) => set("gender", v)} format={displayLabel} />
+                  <ChipChoice label="Condition" value={data.condition} options={CONDITIONS} onChange={(v) => set("condition", v)} format={displayLabel} />
+                  <ChipChoice label="Movement" value={data.movement} options={MOVEMENTS} onChange={(v) => set("movement", v)} format={displayLabel} />
+                  <ChipChoice label="Style" value={data.style ?? STYLES[0]} options={STYLES} onChange={(v) => set("style", v)} format={displayLabel} />
                   <div className="admin-form-grid three">
                     <label className="admin-field">
-                      <span>Perfumer</span>
-                      <input value={data.perfumer ?? ""} maxLength={500} onChange={(e) => set("perfumer", e.target.value || null)} />
-                      <FieldError error={errors.perfumer} />
+                      <span>Case material</span>
+                      <select
+                        value={data.caseMaterial ?? ""}
+                        aria-invalid={Boolean(errors.caseMaterial)}
+                        onChange={(e) => set("caseMaterial", (e.target.value || null) as ProductInput["caseMaterial"])}
+                      >
+                        <option value="">Not set</option>
+                        {CASE_MATERIALS.map((v) => (
+                          <option key={v} value={v}>
+                            {displayLabel(v)}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError error={errors.caseMaterial} />
+                    </label>
+                    <label className="admin-field">
+                      <span>Strap</span>
+                      <select
+                        value={data.strapType ?? ""}
+                        aria-invalid={Boolean(errors.strapType)}
+                        onChange={(e) => set("strapType", (e.target.value || null) as ProductInput["strapType"])}
+                      >
+                        <option value="">Not set</option>
+                        {STRAPS.map((v) => (
+                          <option key={v} value={v}>
+                            {displayLabel(v)}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError error={errors.strapType} />
+                    </label>
+                    <label className="admin-field">
+                      <span>Glass</span>
+                      <select
+                        value={data.glass ?? ""}
+                        aria-invalid={Boolean(errors.glass)}
+                        onChange={(e) => set("glass", e.target.value || null)}
+                      >
+                        <option value="">Not set</option>
+                        {GLASSES.map((v) => (
+                          <option key={v} value={v}>
+                            {displayLabel(v)}
+                          </option>
+                        ))}
+                      </select>
+                      <FieldError error={errors.glass} />
+                    </label>
+                  </div>
+                  <div className="admin-form-grid four">
+                    <label className="admin-field">
+                      <span>Case size (mm)</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={200}
+                        value={data.caseSizeMm ?? ""}
+                        aria-invalid={Boolean(errors.caseSizeMm)}
+                        onChange={(e) => set("caseSizeMm", e.target.value ? Number(e.target.value) : null)}
+                      />
+                      <FieldError error={errors.caseSizeMm} />
+                    </label>
+                    <label className="admin-field">
+                      <span>Water resistance (m)</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        value={data.waterResistanceM ?? ""}
+                        aria-invalid={Boolean(errors.waterResistanceM)}
+                        onChange={(e) => set("waterResistanceM", e.target.value ? Number(e.target.value) : null)}
+                      />
+                      <FieldError error={errors.waterResistanceM} />
+                    </label>
+                    <label className="admin-field">
+                      <span>Warranty (months)</span>
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={0}
+                        value={data.warrantyMonths ?? ""}
+                        aria-invalid={Boolean(errors.warrantyMonths)}
+                        onChange={(e) => set("warrantyMonths", e.target.value ? Number(e.target.value) : null)}
+                      />
+                      <FieldError error={errors.warrantyMonths} />
                     </label>
                     <label className="admin-field">
                       <span>Launch year</span>
@@ -323,13 +434,43 @@ export function ProductEditor({
                         min={1700}
                         max={2200}
                         value={data.launchYear ?? ""}
+                        aria-invalid={Boolean(errors.launchYear)}
                         onChange={(e) => set("launchYear", e.target.value ? Number(e.target.value) : null)}
                       />
                       <FieldError error={errors.launchYear} />
                     </label>
+                  </div>
+                  <div className="admin-form-grid three">
+                    <label className="admin-field">
+                      <span>Dial colour</span>
+                      <input
+                        value={data.dialColor ?? ""}
+                        maxLength={500}
+                        placeholder="e.g. Midnight blue"
+                        aria-invalid={Boolean(errors.dialColor)}
+                        onChange={(e) => set("dialColor", e.target.value || null)}
+                      />
+                      <FieldError error={errors.dialColor} />
+                    </label>
+                    <label className="admin-field">
+                      <span>Reference number</span>
+                      <input
+                        value={data.referenceNo ?? ""}
+                        maxLength={500}
+                        placeholder="e.g. NW-4402-B"
+                        aria-invalid={Boolean(errors.referenceNo)}
+                        onChange={(e) => set("referenceNo", e.target.value || null)}
+                      />
+                      <FieldError error={errors.referenceNo} />
+                    </label>
                     <label className="admin-field">
                       <span>Country of origin</span>
-                      <input value={data.countryOfOrigin ?? ""} maxLength={500} onChange={(e) => set("countryOfOrigin", e.target.value || null)} />
+                      <input
+                        value={data.countryOfOrigin ?? ""}
+                        maxLength={500}
+                        aria-invalid={Boolean(errors.countryOfOrigin)}
+                        onChange={(e) => set("countryOfOrigin", e.target.value || null)}
+                      />
                       <FieldError error={errors.countryOfOrigin} />
                     </label>
                   </div>
@@ -338,10 +479,10 @@ export function ProductEditor({
             </>
           )}
 
-          {tab === "Variants" && (
+          {tab === "Options" && (
             <Panel
-              title="Pricing & stock"
-              description={`Whole ${storeConfig.currency.code} amounts. Stock is re-checked when you save, so concurrent orders are never overwritten.`}
+              title="Options, pricing & stock"
+              description={`Dial and strap combinations, in whole ${storeConfig.currency.code} amounts. Stock is re-checked when you save, so concurrent orders are never overwritten.`}
             >
               <div className="admin-variants">
                 {data.variants.map((v, i) => {
@@ -349,15 +490,15 @@ export function ProductEditor({
                   const err = (key: string) => errors[`variants.${i}.${key}`];
                   return (
                     <fieldset key={v.id ?? i} className="admin-variant" data-inactive={!v.isActive || undefined}>
-                      <legend className="admin-sr-only">Variant {i + 1}</legend>
+                      <legend className="admin-sr-only">Option {i + 1}</legend>
                       <div className="admin-variant-head">
                         <span className="admin-variant-title">
-                          <strong>{v.sizeLabel || `${v.sizeMl} ml`}</strong>
+                          <strong>{v.optionLabel || `Option ${i + 1}`}</strong>
                           {off > 0 && <span className="admin-tag" data-tone="info">−{off}%</span>}
                         </span>
                         <label className="admin-radio-pill">
                           <input type="radio" name="default-variant" checked={v.isDefault} onChange={() => variant(i, "isDefault", true)} />
-                          Default size
+                          Default option
                         </label>
                         <label className="admin-switch-inline">
                           <input type="checkbox" role="switch" className="admin-switch" checked={v.isActive} onChange={(e) => variant(i, "isActive", e.target.checked)} />
@@ -367,22 +508,23 @@ export function ProductEditor({
                           type="button"
                           className="admin-btn icon sm ghost"
                           disabled={data.variants.length === 1}
-                          aria-label={`Remove variant ${i + 1}`}
+                          aria-label={`Remove option ${i + 1}`}
                           onClick={() => set("variants", data.variants.filter((_, n) => n !== i))}
                         >
                           <Trash2 size={15} />
                         </button>
                       </div>
                       <div className="admin-form-grid four">
-                        <label className="admin-field">
-                          <span>Size (ml)</span>
-                          <input type="number" inputMode="numeric" min={1} step={1} value={v.sizeMl} onChange={(e) => variant(i, "sizeMl", Number(e.target.value))} aria-invalid={Boolean(err("sizeMl"))} />
-                          <FieldError error={err("sizeMl")} />
-                        </label>
-                        <label className="admin-field">
-                          <span>Label</span>
-                          <input value={v.sizeLabel ?? ""} onChange={(e) => variant(i, "sizeLabel", e.target.value)} placeholder="100 ml" />
-                          <FieldError error={err("sizeLabel")} />
+                        <label className="admin-field span-2">
+                          <span>Option label</span>
+                          <input
+                            value={v.optionLabel ?? ""}
+                            maxLength={500}
+                            placeholder="Black dial · steel bracelet"
+                            aria-invalid={Boolean(err("optionLabel"))}
+                            onChange={(e) => variant(i, "optionLabel", e.target.value || null)}
+                          />
+                          <FieldError error={err("optionLabel")} />
                         </label>
                         <label className="admin-field span-2">
                           <span>SKU</span>
@@ -394,7 +536,11 @@ export function ProductEditor({
                               title="Suggest SKU"
                               aria-label="Suggest SKU"
                               onClick={() =>
-                                variant(i, "sku", `${slug(brand?.name ?? "brand")}-${slug(data.name) || "product"}-${v.sizeMl}`.toUpperCase())
+                                variant(
+                                  i,
+                                  "sku",
+                                  `${slug(brand?.name ?? "brand")}-${slug(data.name) || "watch"}-${slug(v.optionLabel ?? "") || `option-${i + 1}`}`.toUpperCase(),
+                                )
                               }
                             >
                               <Sparkles size={15} />
@@ -425,7 +571,7 @@ export function ProductEditor({
                         </label>
                         <label className="admin-field">
                           <span>Barcode</span>
-                          <input value={v.barcode ?? ""} onChange={(e) => variant(i, "barcode", e.target.value)} className="admin-mono" />
+                          <input value={v.barcode ?? ""} maxLength={500} onChange={(e) => variant(i, "barcode", e.target.value || null)} className="admin-mono" aria-invalid={Boolean(err("barcode"))} />
                           <FieldError error={err("barcode")} />
                         </label>
                       </div>
@@ -433,7 +579,7 @@ export function ProductEditor({
                   );
                 })}
                 <button type="button" className="admin-add-tile" onClick={() => set("variants", [...data.variants, blankVariant()])}>
-                  <Plus size={16} /> Add another size
+                  <Plus size={16} /> Add another option
                 </button>
               </div>
               <FieldError error={errors.variants} />
@@ -532,58 +678,45 @@ export function ProductEditor({
             </Panel>
           )}
 
-          {tab === "Notes" && (
+          {tab === "Features" && (
             <Panel
-              title="Scent pyramid"
-              description="Notes power the storefront's note filters and the product page pyramid."
-              actions={
-                <InlineCreate
-                  entity="notes"
-                  choices={choices}
-                  onCreated={(noteId) => set("notes", [...data.notes, { noteId, position: "top" }])}
-                />
-              }
+              title="Features"
+              description="Grouped features power the storefront filters, the product page chips and related-watch suggestions."
             >
-              <div className="admin-pyramid">
-                {POSITIONS.map(([position, title, blurb]) => {
-                  const picked = data.notes.filter((n) => n.position === position);
-                  return (
-                    <div key={position} className="admin-pyramid-tier">
-                      <div className="admin-pyramid-head">
-                        <strong>{title}</strong>
-                        <small>{blurb}</small>
-                      </div>
-                      <div className="admin-chips">
-                        {picked.map((n) => {
-                          const note = choices.notes.find((c) => c.id === n.noteId);
-                          return (
-                            <span className="admin-chip on" key={n.noteId}>
-                              {note?.name ?? "Unknown"}
-                              <button
-                                type="button"
-                                aria-label={`Remove ${note?.name} from ${title.toLowerCase()}`}
-                                onClick={() => set("notes", data.notes.filter((v) => v.noteId !== n.noteId || v.position !== position))}
-                              >
-                                <X size={12} />
-                              </button>
-                            </span>
-                          );
-                        })}
-                        {!picked.length && <small className="admin-muted">None yet</small>}
-                      </div>
-                      <Combobox
-                        label={`Add ${title.toLowerCase()}`}
-                        hideLabel
-                        placeholder={`Add ${title.toLowerCase()}…`}
-                        options={choices.notes
-                          .filter((c) => !picked.some((p) => p.noteId === c.id))
-                          .map((c) => ({ value: c.id, label: c.name, hint: humanize(c.group) }))}
-                        onSelect={(noteId) => set("notes", [...data.notes, { noteId, position }])}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+              {choices.features.length ? (
+                <div className="admin-form">
+                  {FEATURE_GROUPS.map((group) => {
+                    const options = choices.features.filter((f) => f.group === group);
+                    if (!options.length) return null;
+                    const picked = options.filter((f) => data.featureIds.includes(f.id)).length;
+                    return (
+                      <fieldset className="admin-choice-group" key={group}>
+                        <legend>
+                          {displayLabel(group)}
+                          {picked > 0 && <span className="admin-count">{picked}</span>}
+                        </legend>
+                        <div className="admin-chips">
+                          {options.map((f) => (
+                            <label className="admin-chip" key={f.id}>
+                              <input
+                                type="checkbox"
+                                checked={data.featureIds.includes(f.id)}
+                                onChange={(e) => toggleFeature(f.id, e.target.checked)}
+                              />
+                              {f.name}
+                            </label>
+                          ))}
+                        </div>
+                      </fieldset>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="admin-callout" data-tone="info">
+                  No features yet. Add them under Taxonomy, then attach them here.
+                </p>
+              )}
+              <FieldError error={errors.featureIds} />
             </Panel>
           )}
         </div>
@@ -634,26 +767,11 @@ export function ProductEditor({
                   onSelect={(v) => set("brandId", v)}
                 />
                 <FieldError error={errors.brandId} />
-                <InlineCreate entity="brands" choices={choices} onCreated={(v) => set("brandId", v)} />
               </div>
               <label className="admin-field">
-                <span>Fragrance family</span>
-                <input
-                  list="admin-families"
-                  value={data.fragranceFamily ?? ""}
-                  maxLength={500}
-                  placeholder="e.g. Woody aromatic"
-                  onChange={(e) => set("fragranceFamily", e.target.value || null)}
-                />
-                <datalist id="admin-families">
-                  {choices.families.map((f) => (
-                    <option key={f} value={f} />
-                  ))}
-                </datalist>
-              </label>
-              <label className="admin-field">
                 <span>Collection name</span>
-                <input value={data.collectionName ?? ""} maxLength={500} placeholder="Optional line or series" onChange={(e) => set("collectionName", e.target.value || null)} />
+                <input value={data.collectionName ?? ""} maxLength={500} placeholder="Optional model family" onChange={(e) => set("collectionName", e.target.value || null)} />
+                <FieldError error={errors.collectionName} />
               </label>
             </div>
           </Panel>
@@ -661,10 +779,10 @@ export function ProductEditor({
           <Panel title="Visibility">
             <div className="admin-switch-list">
               {id && (
-                <SwitchField label="Visible in store" description="Hidden products can't be found or bought." checked={data.isActive} onChange={(v) => set("isActive", v)} />
+                <SwitchField label="Visible in store" description="Hidden watches can't be found or bought." checked={data.isActive} onChange={(v) => set("isActive", v)} />
               )}
               <SwitchField label="Featured" description="Eligible for featured carousels." checked={data.isFeatured} onChange={(v) => set("isFeatured", v)} />
-              <SwitchField label="Ground shipping only" description="For bottles that can't fly." checked={data.groundShippingOnly} onChange={(v) => set("groundShippingOnly", v)} />
+              <SwitchField label="Ground shipping only" description="For heavy or bulky items that can't fly." checked={data.groundShippingOnly} onChange={(v) => set("groundShippingOnly", v)} />
             </div>
           </Panel>
 
@@ -676,11 +794,11 @@ export function ProductEditor({
               </div>
               <div>
                 <dt>Stock</dt>
-                <dd>{stock} units across {activeVariants.length} active {activeVariants.length === 1 ? "size" : "sizes"}</dd>
+                <dd>{stock} units across {activeVariants.length} active {activeVariants.length === 1 ? "option" : "options"}</dd>
               </div>
               <div>
-                <dt>Notes</dt>
-                <dd>{data.notes.length || "None"}</dd>
+                <dt>Features</dt>
+                <dd>{data.featureIds.length || "None"}</dd>
               </div>
             </dl>
           </Panel>

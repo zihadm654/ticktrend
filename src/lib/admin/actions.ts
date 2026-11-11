@@ -22,7 +22,7 @@ import { hasDeliveredPurchase } from "@/lib/reviews/server";
 import { storeConfig } from "../../../store.config";
 const tables = {
   brands: s.brands,
-  notes: s.notes,
+  features: s.features,
   collections: s.collections,
   banners: s.banners,
   homepage: s.homepageSections,
@@ -92,18 +92,18 @@ export async function saveEntity(
         saved = rows[0]?.id;
         break;
       }
-      case "notes": {
-        const values = entitySchemas.notes.parse(input);
+      case "features": {
+        const values = entitySchemas.features.parse(input);
         const rows = id
           ? await db
-              .update(s.notes)
+              .update(s.features)
               .set(values)
-              .where(eq(s.notes.id, id))
-              .returning({ id: s.notes.id })
+              .where(eq(s.features.id, id))
+              .returning({ id: s.features.id })
           : await db
-              .insert(s.notes)
+              .insert(s.features)
               .values(values)
-              .returning({ id: s.notes.id });
+              .returning({ id: s.features.id });
         saved = rows[0]?.id;
         break;
       }

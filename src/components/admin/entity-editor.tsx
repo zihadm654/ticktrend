@@ -21,9 +21,8 @@ import {
 type RecordData = Record<string, unknown>;
 export type Choices = {
   brands: { id: string; name: string; slug: string }[];
-  notes: { id: string; name: string; slug: string; group: string }[];
+  features: { id: string; name: string; slug: string; group: string }[];
   collections: { id: string; name: string }[];
-  families: string[];
 };
 type Field = {
   key: string;
@@ -59,22 +58,18 @@ const fields: Record<Entity, Field[]> = {
     { key: "isFeatured", label: "Featured brand", kind: "checkbox", hint: "Shown in the homepage brand strip." },
     sort,
   ],
-  notes: [
+  features: [
     ...nameFields,
     {
       key: "group",
-      label: "Note group",
+      label: "Feature group",
       options: [
-        "citrus",
-        "floral",
-        "woody",
-        "oriental",
-        "fresh",
-        "spicy",
-        "sweet",
-        "musky",
-        "green",
-        "aquatic",
+        "display",
+        "complications",
+        "durability",
+        "movement",
+        "case",
+        "strap",
       ],
     },
   ],
@@ -158,7 +153,7 @@ const defaults: Record<Entity, RecordData> = {
     isFeatured: false,
     sortOrder: 0,
   },
-  notes: { name: "", slug: "", group: "fresh" },
+  features: { name: "", slug: "", group: "display" },
   collections: {
     name: "",
     slug: "",
@@ -194,7 +189,7 @@ const defaults: Record<Entity, RecordData> = {
 const labelFor = (entity: Entity) =>
   ({
     brands: "brand",
-    notes: "note",
+    features: "feature",
     collections: "collection",
     banners: "banner",
     homepage: "section",
@@ -213,23 +208,27 @@ export function FilterBuilder({
   const plain = (values: string[]) => values.map((v) => ({ value: v, label: humanize(v) }));
   const groups: [string, string, { value: string; label: string }[]][] = [
     ["brand", "Brands", choices.brands.map((v) => ({ value: v.slug, label: v.name }))],
-    ["brandType", "Brand types", plain(["designer", "niche", "arabian", "celebrity", "local"])],
+    ["brandType", "Brand types", plain(["imported", "mastercopy", "firstcopy", "local"])],
     ["gender", "Gender", plain(["men", "women", "unisex"])],
+    ["movement", "Movement", plain(["quartz", "automatic", "mechanical", "solar", "digital", "smart"])],
     [
-      "concentration",
-      "Concentration",
-      ["edt", "edp", "parfum", "extrait", "edc", "oil", "attar"].map((v) => ({ value: v, label: v.toUpperCase() })),
+      "material",
+      "Case material",
+      plain(["stainless_steel", "alloy", "titanium", "ceramic", "gold_plated", "plastic"]),
     ],
-    ["packaging", "Packaging", plain(["standard", "tester", "sample", "mini", "gift_set"])],
-    ["family", "Fragrance families", choices.families.map((v) => ({ value: v, label: v }))],
-    ["note", "Notes", choices.notes.map((v) => ({ value: v.slug, label: v.name }))],
+    ["strap", "Strap", plain(["leather", "steel", "mesh", "rubber", "silicone", "fabric"])],
+    ["glass", "Glass", plain(["mineral", "sapphire", "acrylic"])],
+    ["style", "Style", plain(["dress", "sport", "casual", "digital"])],
+    ["condition", "Condition", plain(["new", "open_box", "refurbished", "used"])],
+    ["feature", "Features", choices.features.map((v) => ({ value: v.slug, label: v.name }))],
     [
       "size",
-      "Size",
+      "Case size",
       [
-        { value: "under-50", label: "Under 50 ml" },
-        { value: "50-99", label: "50–99 ml" },
-        { value: "100-plus", label: "100 ml +" },
+        { value: "under-36", label: "Under 36 mm" },
+        { value: "36-40", label: "36–40 mm" },
+        { value: "41-44", label: "41–44 mm" },
+        { value: "45-plus", label: "45 mm and over" },
       ],
     ],
   ];
@@ -504,7 +503,7 @@ export function EntityEditor({
           if (onSaved && r.id) onSaved(r.id);
           else if (r.id)
             router.replace(
-              `${pathname}?${entity === "collections" || entity === "notes" ? `tab=${entity}&` : ""}id=${r.id}`,
+              `${pathname}?${entity === "collections" || entity === "features" ? `tab=${entity}&` : ""}id=${r.id}`,
             );
           else router.replace(pathname);
         } else toast.error(r.message);
@@ -523,7 +522,7 @@ export function EntityEditor({
         <span>{f.label}</span>
         {f.kind === "textarea" ? (
           <textarea rows={4} value={String(value ?? "")} onChange={(e) => set(f.key, e.target.value)} />
-        ) : f.key === "slug" && entity !== "notes" ? (
+        ) : f.key === "slug" && entity !== "features" ? (
           <span className="admin-input-affix">
             <em>/{{ brands: "brands", collections: "c", pages: "pages" }[entity as string]}/</em>
             <input value={String(value ?? "")} aria-invalid={Boolean(error)} onChange={(e) => set(f.key, e.target.value)} />
@@ -710,7 +709,7 @@ export function InlineCreate({
   choices,
   onCreated,
 }: {
-  entity: "brands" | "notes";
+  entity: "brands" | "features";
   choices: Choices;
   onCreated: (id: string) => void;
 }) {
@@ -726,16 +725,16 @@ export function InlineCreate({
           dialog.current?.showModal();
         }}
       >
-        <Plus size={14} /> New {entity === "brands" ? "brand" : "note"}
+        <Plus size={14} /> New {entity === "brands" ? "brand" : "feature"}
       </button>
       <dialog ref={dialog} className="admin-dialog">
         <div className="admin-dialog-head">
           <div>
-            <h2>New {entity === "brands" ? "brand" : "note"}</h2>
+            <h2>New {entity === "brands" ? "brand" : "feature"}</h2>
             <p>
               {entity === "brands"
                 ? "Add the basics now; logo and story can be filled in later from Brands."
-                : "Notes are shared across all products."}
+                : "Features are shared across all products and power the catalog filters."}
             </p>
           </div>
           <button type="button" className="admin-btn icon ghost" onClick={() => dialog.current?.close()} aria-label="Close">

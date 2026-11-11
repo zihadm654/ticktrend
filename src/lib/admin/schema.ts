@@ -2,12 +2,14 @@ import { z } from "@/lib/zod";
 import {
   bannerPlacement,
   brandType,
-  concentration,
+  caseMaterial,
+  condition,
   couponType,
+  featureGroup,
   gender,
   homepageSectionType,
-  noteGroup,
-  packaging,
+  movement,
+  strapType,
 } from "@/db/schema";
 import { catalogParamsSchema } from "@/lib/catalog/params";
 import { COUPON_CODE_MAX, normalizeCouponCode } from "@/lib/coupons/rules";
@@ -29,12 +31,12 @@ export const safeUrl = z
 const integer = z.number().int().min(0).max(2147483647);
 const optionalText = text.nullable();
 const description = z.string().max(30000);
+/** One purchasable dial/strap combination. */
 export const variantSchema = z
   .object({
     id: z.string().optional(),
     sku: z.string().trim().min(1).max(120),
-    sizeMl: integer.positive(),
-    sizeLabel: optionalText,
+    optionLabel: optionalText,
     retailPrice: integer,
     price: integer,
     stockQuantity: integer,
@@ -55,10 +57,17 @@ export const productSchema = z
     collectionName: optionalText,
     description,
     gender: z.enum(gender.enumValues),
-    concentration: z.enum(concentration.enumValues),
-    packaging: z.enum(packaging.enumValues),
-    fragranceFamily: optionalText,
-    perfumer: optionalText,
+    condition: z.enum(condition.enumValues),
+    movement: z.enum(movement.enumValues),
+    style: optionalText,
+    caseSizeMm: z.number().int().min(1).max(200).nullable(),
+    caseMaterial: z.enum(caseMaterial.enumValues).nullable(),
+    strapType: z.enum(strapType.enumValues).nullable(),
+    glass: optionalText,
+    waterResistanceM: integer.nullable(),
+    dialColor: optionalText,
+    referenceNo: optionalText,
+    warrantyMonths: integer.nullable(),
     launchYear: z.number().int().min(1700).max(2200).nullable(),
     countryOfOrigin: optionalText,
     groundShippingOnly: z.boolean(),
@@ -68,21 +77,14 @@ export const productSchema = z
     images: z
       .array(z.object({ url: safeUrl.min(1), alt: text.min(1) }))
       .max(20),
-    notes: z
-      .array(
-        z.object({
-          noteId: z.string().min(1),
-          position: z.enum(["top", "heart", "base"]),
-        }),
-      )
-      .max(180),
+    featureIds: z.array(z.string().min(1).max(100)).max(180),
   })
   .superRefine((p, ctx) => {
     if (p.variants.filter((v) => v.isDefault).length !== 1)
       ctx.addIssue({
         code: "custom",
         path: ["variants"],
-        message: "Choose exactly one default variant.",
+        message: "Choose exactly one default option.",
       });
     if (new Set(p.variants.map((v) => v.sku)).size !== p.variants.length)
       ctx.addIssue({
@@ -94,7 +96,7 @@ export const productSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["variants"],
-        message: "The default variant must be active.",
+        message: "The default option must be active.",
       });
   });
 const sectionConfig = z.object({
@@ -136,10 +138,10 @@ export const entitySchemas = {
     isFeatured: z.boolean(),
     sortOrder: integer,
   }),
-  notes: z.object({
+  features: z.object({
     name: text.min(1),
     slug: slugSchema,
-    group: z.enum(noteGroup.enumValues),
+    group: z.enum(featureGroup.enumValues),
   }),
   collections: z.object({
     name: text.min(1),

@@ -21,7 +21,7 @@ export default async function Product({
           with: {
             variants: true,
             images: { orderBy: asc(productImages.sortOrder) },
-            notes: true,
+            features: true,
           },
         });
   if (id !== "new" && !p) notFound();
@@ -39,10 +39,7 @@ export default async function Product({
                   expectedStock: v.stockQuantity,
                 })),
                 images: p.images.map((v) => ({ url: v.url, alt: v.alt })),
-                notes: p.notes.map((v) => ({
-                  noteId: v.noteId,
-                  position: v.position,
-                })),
+                featureIds: p.features.map((v) => v.featureId),
               }
             : undefined
         }
