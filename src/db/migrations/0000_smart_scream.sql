@@ -1,17 +1,18 @@
 CREATE TYPE "public"."banner_placement" AS ENUM('announcement', 'hero', 'event_card', 'promo_strip');--> statement-breakpoint
-CREATE TYPE "public"."brand_type" AS ENUM('designer', 'niche', 'arabian', 'celebrity', 'local');--> statement-breakpoint
-CREATE TYPE "public"."concentration" AS ENUM('edt', 'edp', 'parfum', 'extrait', 'edc', 'oil', 'attar');--> statement-breakpoint
+CREATE TYPE "public"."brand_type" AS ENUM('imported', 'mastercopy', 'firstcopy', 'local');--> statement-breakpoint
+CREATE TYPE "public"."case_material" AS ENUM('stainless_steel', 'alloy', 'titanium', 'ceramic', 'gold_plated', 'plastic');--> statement-breakpoint
+CREATE TYPE "public"."product_condition" AS ENUM('new', 'open_box', 'refurbished', 'used');--> statement-breakpoint
 CREATE TYPE "public"."coupon_type" AS ENUM('percent', 'fixed');--> statement-breakpoint
+CREATE TYPE "public"."feature_group" AS ENUM('display', 'complications', 'durability', 'movement', 'case', 'strap');--> statement-breakpoint
 CREATE TYPE "public"."gender" AS ENUM('men', 'women', 'unisex');--> statement-breakpoint
 CREATE TYPE "public"."homepage_section_type" AS ENUM('hero', 'category_tiles', 'event_cards', 'product_carousel', 'brand_strip', 'value_props', 'collection_banner');--> statement-breakpoint
-CREATE TYPE "public"."note_group" AS ENUM('citrus', 'floral', 'woody', 'oriental', 'fresh', 'spicy', 'sweet', 'musky', 'green', 'aquatic');--> statement-breakpoint
-CREATE TYPE "public"."note_position" AS ENUM('top', 'heart', 'base');--> statement-breakpoint
+CREATE TYPE "public"."movement" AS ENUM('quartz', 'automatic', 'mechanical', 'solar', 'digital', 'smart');--> statement-breakpoint
 CREATE TYPE "public"."order_event_type" AS ENUM('status_change', 'note', 'call_logged', 'system');--> statement-breakpoint
 CREATE TYPE "public"."order_source" AS ENUM('web');--> statement-breakpoint
 CREATE TYPE "public"."order_status" AS ENUM('pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned');--> statement-breakpoint
-CREATE TYPE "public"."packaging" AS ENUM('standard', 'tester', 'sample', 'mini', 'gift_set');--> statement-breakpoint
 CREATE TYPE "public"."payment_method" AS ENUM('cod', 'bkash', 'nagad');--> statement-breakpoint
 CREATE TYPE "public"."review_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
+CREATE TYPE "public"."strap_type" AS ENUM('leather', 'steel', 'mesh', 'rubber', 'silicone', 'fabric');--> statement-breakpoint
 CREATE SEQUENCE "public"."order_number_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1001 CACHE 1;--> statement-breakpoint
 CREATE TABLE "account" (
 	"id" text PRIMARY KEY NOT NULL,
@@ -110,6 +111,26 @@ CREATE TABLE "customers" (
 	CONSTRAINT "customers_phone_e164_check" CHECK ("customers"."phone" ~ '^[+][1-9][0-9]{7,14}$')
 );
 --> statement-breakpoint
+CREATE TABLE "demo_sandboxes" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "demo_sandboxes_user_id_unique" UNIQUE("user_id"),
+	CONSTRAINT "demo_sandboxes_id_check" CHECK ("demo_sandboxes"."id" ~ '^[a-z0-9]{16}$')
+);
+--> statement-breakpoint
+CREATE TABLE "features" (
+	"id" text PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
+	"slug" text NOT NULL,
+	"group" "feature_group" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "features_name_unique" UNIQUE("name"),
+	CONSTRAINT "features_slug_unique" UNIQUE("slug")
+);
+--> statement-breakpoint
 CREATE TABLE "homepage_sections" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" "homepage_section_type" NOT NULL,
@@ -120,17 +141,6 @@ CREATE TABLE "homepage_sections" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "notes" (
-	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
-	"slug" text NOT NULL,
-	"group" "note_group" NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "notes_name_unique" UNIQUE("name"),
-	CONSTRAINT "notes_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
 CREATE TABLE "order_events" (
@@ -190,6 +200,14 @@ CREATE TABLE "orders" (
 	CONSTRAINT "orders_amounts_check" CHECK ("orders"."subtotal" >= 0 AND "orders"."delivery_fee" >= 0 AND "orders"."discount" >= 0 AND "orders"."discount" <= "orders"."subtotal" + "orders"."delivery_fee" AND "orders"."total" = "orders"."subtotal" + "orders"."delivery_fee" - "orders"."discount")
 );
 --> statement-breakpoint
+CREATE TABLE "product_features" (
+	"product_id" text NOT NULL,
+	"feature_id" text NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "product_features_product_id_feature_id_pk" PRIMARY KEY("product_id","feature_id")
+);
+--> statement-breakpoint
 CREATE TABLE "product_images" (
 	"id" text PRIMARY KEY NOT NULL,
 	"product_id" text NOT NULL,
@@ -200,21 +218,11 @@ CREATE TABLE "product_images" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "product_notes" (
-	"product_id" text NOT NULL,
-	"note_id" text NOT NULL,
-	"position" "note_position" NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "product_notes_product_id_note_id_position_pk" PRIMARY KEY("product_id","note_id","position")
-);
---> statement-breakpoint
 CREATE TABLE "product_variants" (
 	"id" text PRIMARY KEY NOT NULL,
 	"product_id" text NOT NULL,
 	"sku" text NOT NULL,
-	"size_ml" integer NOT NULL,
-	"size_label" text,
+	"option_label" text,
 	"retail_price" integer NOT NULL,
 	"price" integer NOT NULL,
 	"cost_price" integer,
@@ -229,7 +237,6 @@ CREATE TABLE "product_variants" (
 	CONSTRAINT "variants_price_check" CHECK ("product_variants"."price" >= 0 AND "product_variants"."price" <= "product_variants"."retail_price"),
 	CONSTRAINT "variants_cost_check" CHECK ("product_variants"."cost_price" IS NULL OR "product_variants"."cost_price" >= 0),
 	CONSTRAINT "variants_stock_check" CHECK ("product_variants"."stock_quantity" >= 0),
-	CONSTRAINT "variants_size_check" CHECK ("product_variants"."size_ml" > 0),
 	CONSTRAINT "variants_low_stock_check" CHECK ("product_variants"."low_stock_override" IS NULL OR "product_variants"."low_stock_override" >= 0)
 );
 --> statement-breakpoint
@@ -241,10 +248,17 @@ CREATE TABLE "products" (
 	"collection_name" text,
 	"description" text DEFAULT '' NOT NULL,
 	"gender" "gender" NOT NULL,
-	"concentration" "concentration" NOT NULL,
-	"packaging" "packaging" DEFAULT 'standard' NOT NULL,
-	"fragrance_family" text,
-	"perfumer" text,
+	"condition" "product_condition" DEFAULT 'new' NOT NULL,
+	"movement" "movement" NOT NULL,
+	"style" text,
+	"case_size_mm" integer,
+	"case_material" "case_material",
+	"strap_type" "strap_type",
+	"glass" text,
+	"water_resistance_m" integer,
+	"dial_color" text,
+	"reference_no" text,
+	"warranty_months" integer,
 	"launch_year" integer,
 	"country_of_origin" text,
 	"ground_shipping_only" boolean DEFAULT false NOT NULL,
@@ -253,7 +267,16 @@ CREATE TABLE "products" (
 	"meta" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "products_slug_unique" UNIQUE("slug")
+	CONSTRAINT "products_slug_unique" UNIQUE("slug"),
+	CONSTRAINT "products_caseSize_Mm_check" CHECK ("products"."case_size_mm" IS NULL OR "products"."case_size_mm" > 0),
+	CONSTRAINT "products_water_check" CHECK ("products"."water_resistance_m" IS NULL OR "products"."water_resistance_m" >= 0),
+	CONSTRAINT "products_warrantyMonths_check" CHECK ("products"."warranty_months" IS NULL OR "products"."warranty_months" >= 0)
+);
+--> statement-breakpoint
+CREATE TABLE "rate_limits" (
+	"key" text PRIMARY KEY NOT NULL,
+	"count" integer NOT NULL,
+	"expires_at" timestamp with time zone NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "reviews" (
@@ -269,6 +292,13 @@ CREATE TABLE "reviews" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "reviews_rating_check" CHECK ("reviews"."rating" BETWEEN 1 AND 5)
+);
+--> statement-breakpoint
+CREATE TABLE "sandbox_uploads" (
+	"key" text PRIMARY KEY NOT NULL,
+	"bytes" "bytea" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "sandbox_uploads_key_check" CHECK ("sandbox_uploads"."key" ~ '^sbx-[a-zA-Z0-9-]+[.]webp$')
 );
 --> statement-breakpoint
 CREATE TABLE "session" (
@@ -323,13 +353,14 @@ CREATE TABLE "verification" (
 );
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "demo_sandboxes" ADD CONSTRAINT "demo_sandboxes_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_events" ADD CONSTRAINT "order_events_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_order_id_orders_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."orders"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_items" ADD CONSTRAINT "order_items_variant_id_product_variants_id_fk" FOREIGN KEY ("variant_id") REFERENCES "public"."product_variants"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "orders" ADD CONSTRAINT "orders_customer_id_customers_id_fk" FOREIGN KEY ("customer_id") REFERENCES "public"."customers"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_features" ADD CONSTRAINT "product_features_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_features" ADD CONSTRAINT "product_features_feature_id_features_id_fk" FOREIGN KEY ("feature_id") REFERENCES "public"."features"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_images" ADD CONSTRAINT "product_images_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_notes" ADD CONSTRAINT "product_notes_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_notes" ADD CONSTRAINT "product_notes_note_id_notes_id_fk" FOREIGN KEY ("note_id") REFERENCES "public"."notes"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variants" ADD CONSTRAINT "product_variants_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "products" ADD CONSTRAINT "products_brand_id_brands_id_fk" FOREIGN KEY ("brand_id") REFERENCES "public"."brands"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reviews" ADD CONSTRAINT "reviews_product_id_products_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -338,8 +369,9 @@ CREATE INDEX "account_user_idx" ON "account" USING btree ("user_id");--> stateme
 CREATE UNIQUE INDEX "account_provider_account_idx" ON "account" USING btree ("provider_id","account_id");--> statement-breakpoint
 CREATE INDEX "banners_placement_idx" ON "banners" USING btree ("placement","is_active","sort_order");--> statement-breakpoint
 CREATE INDEX "brands_type_idx" ON "brands" USING btree ("brand_type");--> statement-breakpoint
+CREATE INDEX "demo_sandboxes_expires_idx" ON "demo_sandboxes" USING btree ("expires_at");--> statement-breakpoint
+CREATE INDEX "features_group_idx" ON "features" USING btree ("group");--> statement-breakpoint
 CREATE INDEX "homepage_sections_order_idx" ON "homepage_sections" USING btree ("is_active","sort_order");--> statement-breakpoint
-CREATE INDEX "notes_group_idx" ON "notes" USING btree ("group");--> statement-breakpoint
 CREATE INDEX "order_events_timeline_idx" ON "order_events" USING btree ("order_id","created_at");--> statement-breakpoint
 CREATE INDEX "order_events_created_idx" ON "order_events" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "order_items_order_idx" ON "order_items" USING btree ("order_id");--> statement-breakpoint
@@ -349,21 +381,21 @@ CREATE INDEX "orders_status_created_idx" ON "orders" USING btree ("status","crea
 CREATE INDEX "orders_created_idx" ON "orders" USING btree ("created_at");--> statement-breakpoint
 CREATE INDEX "orders_phone_idx" ON "orders" USING btree ("customer_phone");--> statement-breakpoint
 CREATE INDEX "orders_payment_idx" ON "orders" USING btree ("payment_method");--> statement-breakpoint
+CREATE INDEX "product_features_feature_idx" ON "product_features" USING btree ("feature_id","product_id");--> statement-breakpoint
 CREATE INDEX "product_images_order_idx" ON "product_images" USING btree ("product_id","sort_order");--> statement-breakpoint
-CREATE INDEX "product_notes_note_idx" ON "product_notes" USING btree ("note_id","product_id");--> statement-breakpoint
 CREATE INDEX "variants_product_idx" ON "product_variants" USING btree ("product_id");--> statement-breakpoint
 CREATE INDEX "variants_price_idx" ON "product_variants" USING btree ("price");--> statement-breakpoint
-CREATE INDEX "variants_size_idx" ON "product_variants" USING btree ("size_ml");--> statement-breakpoint
 CREATE INDEX "variants_stock_idx" ON "product_variants" USING btree ("stock_quantity");--> statement-breakpoint
 CREATE UNIQUE INDEX "variants_one_default_idx" ON "product_variants" USING btree ("product_id") WHERE "product_variants"."is_default" = true;--> statement-breakpoint
 CREATE INDEX "products_brand_idx" ON "products" USING btree ("brand_id");--> statement-breakpoint
 CREATE INDEX "products_gender_idx" ON "products" USING btree ("gender");--> statement-breakpoint
-CREATE INDEX "products_concentration_idx" ON "products" USING btree ("concentration");--> statement-breakpoint
-CREATE INDEX "products_packaging_idx" ON "products" USING btree ("packaging");--> statement-breakpoint
-CREATE INDEX "products_family_idx" ON "products" USING btree ("fragrance_family");--> statement-breakpoint
+CREATE INDEX "products_condition_idx" ON "products" USING btree ("condition");--> statement-breakpoint
+CREATE INDEX "products_movement_idx" ON "products" USING btree ("movement");--> statement-breakpoint
+CREATE INDEX "products_style_idx" ON "products" USING btree ("style");--> statement-breakpoint
+CREATE INDEX "products_case_size_idx" ON "products" USING btree ("case_size_mm");--> statement-breakpoint
 CREATE INDEX "products_active_created_idx" ON "products" USING btree ("is_active","created_at");--> statement-breakpoint
 CREATE INDEX "products_featured_idx" ON "products" USING btree ("is_featured");--> statement-breakpoint
-CREATE INDEX "products_name_gin_idx" ON "products" USING gin (to_tsvector('simple', "name"));--> statement-breakpoint
+CREATE INDEX "rate_limits_expires_idx" ON "rate_limits" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "reviews_product_status_idx" ON "reviews" USING btree ("product_id","status");--> statement-breakpoint
 CREATE INDEX "session_user_idx" ON "session" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "verification_identifier_idx" ON "verification" USING btree ("identifier");

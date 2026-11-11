@@ -1,5 +1,5 @@
 {
-  "id": "083c9438-6321-4478-9af3-790803dac883",
+  "id": "7f21a900-a4d6-4cae-918a-145525d4aebd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -676,6 +676,170 @@
       },
       "isRLSEnabled": false
     },
+    "public.demo_sandboxes": {
+      "name": "demo_sandboxes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "demo_sandboxes_expires_idx": {
+          "name": "demo_sandboxes_expires_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "demo_sandboxes_user_id_user_id_fk": {
+          "name": "demo_sandboxes_user_id_user_id_fk",
+          "tableFrom": "demo_sandboxes",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "demo_sandboxes_user_id_unique": {
+          "name": "demo_sandboxes_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "demo_sandboxes_id_check": {
+          "name": "demo_sandboxes_id_check",
+          "value": "\"demo_sandboxes\".\"id\" ~ '^[a-z0-9]{16}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.features": {
+      "name": "features",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "group": {
+          "name": "group",
+          "type": "feature_group",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "features_group_idx": {
+          "name": "features_group_idx",
+          "columns": [
+            {
+              "expression": "group",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "features_name_unique": {
+          "name": "features_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        },
+        "features_slug_unique": {
+          "name": "features_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.homepage_sections": {
       "name": "homepage_sections",
       "schema": "",
@@ -767,89 +931,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.notes": {
-      "name": "notes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "group": {
-          "name": "group",
-          "type": "note_group",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "notes_group_idx": {
-          "name": "notes_group_idx",
-          "columns": [
-            {
-              "expression": "group",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "notes_name_unique": {
-          "name": "notes_name_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
-        },
-        "notes_slug_unique": {
-          "name": "notes_slug_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
-        }
-      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1403,6 +1484,102 @@
       },
       "isRLSEnabled": false
     },
+    "public.product_features": {
+      "name": "product_features",
+      "schema": "",
+      "columns": {
+        "product_id": {
+          "name": "product_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feature_id": {
+          "name": "feature_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "product_features_feature_idx": {
+          "name": "product_features_feature_idx",
+          "columns": [
+            {
+              "expression": "feature_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "product_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "product_features_product_id_products_id_fk": {
+          "name": "product_features_product_id_products_id_fk",
+          "tableFrom": "product_features",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "product_features_feature_id_features_id_fk": {
+          "name": "product_features_feature_id_features_id_fk",
+          "tableFrom": "product_features",
+          "tableTo": "features",
+          "columnsFrom": [
+            "feature_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "product_features_product_id_feature_id_pk": {
+          "name": "product_features_product_id_feature_id_pk",
+          "columns": [
+            "product_id",
+            "feature_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.product_images": {
       "name": "product_images",
       "schema": "",
@@ -1497,110 +1674,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.product_notes": {
-      "name": "product_notes",
-      "schema": "",
-      "columns": {
-        "product_id": {
-          "name": "product_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "note_id": {
-          "name": "note_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position": {
-          "name": "position",
-          "type": "note_position",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "product_notes_note_idx": {
-          "name": "product_notes_note_idx",
-          "columns": [
-            {
-              "expression": "note_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "product_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "product_notes_product_id_products_id_fk": {
-          "name": "product_notes_product_id_products_id_fk",
-          "tableFrom": "product_notes",
-          "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "product_notes_note_id_notes_id_fk": {
-          "name": "product_notes_note_id_notes_id_fk",
-          "tableFrom": "product_notes",
-          "tableTo": "notes",
-          "columnsFrom": [
-            "note_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "product_notes_product_id_note_id_position_pk": {
-          "name": "product_notes_product_id_note_id_position_pk",
-          "columns": [
-            "product_id",
-            "note_id",
-            "position"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.product_variants": {
       "name": "product_variants",
       "schema": "",
@@ -1623,14 +1696,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "size_ml": {
-          "name": "size_ml",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "size_label": {
-          "name": "size_label",
+        "option_label": {
+          "name": "option_label",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -1732,21 +1799,6 @@
           "method": "btree",
           "with": {}
         },
-        "variants_size_idx": {
-          "name": "variants_size_idx",
-          "columns": [
-            {
-              "expression": "size_ml",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "variants_stock_idx": {
           "name": "variants_stock_idx",
           "columns": [
@@ -1818,10 +1870,6 @@
           "name": "variants_stock_check",
           "value": "\"product_variants\".\"stock_quantity\" >= 0"
         },
-        "variants_size_check": {
-          "name": "variants_size_check",
-          "value": "\"product_variants\".\"size_ml\" > 0"
-        },
         "variants_low_stock_check": {
           "name": "variants_low_stock_check",
           "value": "\"product_variants\".\"low_stock_override\" IS NULL OR \"product_variants\".\"low_stock_override\" >= 0"
@@ -1877,30 +1925,74 @@
           "primaryKey": false,
           "notNull": true
         },
-        "concentration": {
-          "name": "concentration",
-          "type": "concentration",
+        "condition": {
+          "name": "condition",
+          "type": "product_condition",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "movement": {
+          "name": "movement",
+          "type": "movement",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
-        "packaging": {
-          "name": "packaging",
-          "type": "packaging",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'standard'"
-        },
-        "fragrance_family": {
-          "name": "fragrance_family",
+        "style": {
+          "name": "style",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "perfumer": {
-          "name": "perfumer",
+        "case_size_mm": {
+          "name": "case_size_mm",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "case_material": {
+          "name": "case_material",
+          "type": "case_material",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "strap_type": {
+          "name": "strap_type",
+          "type": "strap_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "glass": {
+          "name": "glass",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "water_resistance_m": {
+          "name": "water_resistance_m",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dial_color": {
+          "name": "dial_color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reference_no": {
+          "name": "reference_no",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "warranty_months": {
+          "name": "warranty_months",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
@@ -1990,11 +2082,11 @@
           "method": "btree",
           "with": {}
         },
-        "products_concentration_idx": {
-          "name": "products_concentration_idx",
+        "products_condition_idx": {
+          "name": "products_condition_idx",
           "columns": [
             {
-              "expression": "concentration",
+              "expression": "condition",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2005,11 +2097,11 @@
           "method": "btree",
           "with": {}
         },
-        "products_packaging_idx": {
-          "name": "products_packaging_idx",
+        "products_movement_idx": {
+          "name": "products_movement_idx",
           "columns": [
             {
-              "expression": "packaging",
+              "expression": "movement",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2020,11 +2112,26 @@
           "method": "btree",
           "with": {}
         },
-        "products_family_idx": {
-          "name": "products_family_idx",
+        "products_style_idx": {
+          "name": "products_style_idx",
           "columns": [
             {
-              "expression": "fragrance_family",
+              "expression": "style",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "products_case_size_idx": {
+          "name": "products_case_size_idx",
+          "columns": [
+            {
+              "expression": "case_size_mm",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2070,21 +2177,6 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
-        },
-        "products_name_gin_idx": {
-          "name": "products_name_gin_idx",
-          "columns": [
-            {
-              "expression": "to_tsvector('simple', \"name\")",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "gin",
-          "with": {}
         }
       },
       "foreignKeys": {
@@ -2112,6 +2204,66 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {
+        "products_caseSize_Mm_check": {
+          "name": "products_caseSize_Mm_check",
+          "value": "\"products\".\"case_size_mm\" IS NULL OR \"products\".\"case_size_mm\" > 0"
+        },
+        "products_water_check": {
+          "name": "products_water_check",
+          "value": "\"products\".\"water_resistance_m\" IS NULL OR \"products\".\"water_resistance_m\" >= 0"
+        },
+        "products_warrantyMonths_check": {
+          "name": "products_warrantyMonths_check",
+          "value": "\"products\".\"warranty_months\" IS NULL OR \"products\".\"warranty_months\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.rate_limits": {
+      "name": "rate_limits",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "count": {
+          "name": "count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "rate_limits_expires_idx": {
+          "name": "rate_limits_expires_idx",
+          "columns": [
+            {
+              "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2237,6 +2389,43 @@
         "reviews_rating_check": {
           "name": "reviews_rating_check",
           "value": "\"reviews\".\"rating\" BETWEEN 1 AND 5"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.sandbox_uploads": {
+      "name": "sandbox_uploads",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "bytes": {
+          "name": "bytes",
+          "type": "bytea",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "sandbox_uploads_key_check": {
+          "name": "sandbox_uploads_key_check",
+          "value": "\"sandbox_uploads\".\"key\" ~ '^sbx-[a-zA-Z0-9-]+[.]webp$'"
         }
       },
       "isRLSEnabled": false
@@ -2603,24 +2792,32 @@
       "name": "brand_type",
       "schema": "public",
       "values": [
-        "designer",
-        "niche",
-        "arabian",
-        "celebrity",
+        "imported",
+        "mastercopy",
+        "firstcopy",
         "local"
       ]
     },
-    "public.concentration": {
-      "name": "concentration",
+    "public.case_material": {
+      "name": "case_material",
       "schema": "public",
       "values": [
-        "edt",
-        "edp",
-        "parfum",
-        "extrait",
-        "edc",
-        "oil",
-        "attar"
+        "stainless_steel",
+        "alloy",
+        "titanium",
+        "ceramic",
+        "gold_plated",
+        "plastic"
+      ]
+    },
+    "public.product_condition": {
+      "name": "product_condition",
+      "schema": "public",
+      "values": [
+        "new",
+        "open_box",
+        "refurbished",
+        "used"
       ]
     },
     "public.coupon_type": {
@@ -2629,6 +2826,18 @@
       "values": [
         "percent",
         "fixed"
+      ]
+    },
+    "public.feature_group": {
+      "name": "feature_group",
+      "schema": "public",
+      "values": [
+        "display",
+        "complications",
+        "durability",
+        "movement",
+        "case",
+        "strap"
       ]
     },
     "public.gender": {
@@ -2653,29 +2862,16 @@
         "collection_banner"
       ]
     },
-    "public.note_group": {
-      "name": "note_group",
+    "public.movement": {
+      "name": "movement",
       "schema": "public",
       "values": [
-        "citrus",
-        "floral",
-        "woody",
-        "oriental",
-        "fresh",
-        "spicy",
-        "sweet",
-        "musky",
-        "green",
-        "aquatic"
-      ]
-    },
-    "public.note_position": {
-      "name": "note_position",
-      "schema": "public",
-      "values": [
-        "top",
-        "heart",
-        "base"
+        "quartz",
+        "automatic",
+        "mechanical",
+        "solar",
+        "digital",
+        "smart"
       ]
     },
     "public.order_event_type": {
@@ -2708,17 +2904,6 @@
         "returned"
       ]
     },
-    "public.packaging": {
-      "name": "packaging",
-      "schema": "public",
-      "values": [
-        "standard",
-        "tester",
-        "sample",
-        "mini",
-        "gift_set"
-      ]
-    },
     "public.payment_method": {
       "name": "payment_method",
       "schema": "public",
@@ -2735,6 +2920,18 @@
         "pending",
         "approved",
         "rejected"
+      ]
+    },
+    "public.strap_type": {
+      "name": "strap_type",
+      "schema": "public",
+      "values": [
+        "leather",
+        "steel",
+        "mesh",
+        "rubber",
+        "silicone",
+        "fabric"
       ]
     }
   },

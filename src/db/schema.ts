@@ -9,11 +9,9 @@ const timestamps = () => ({
 });
 
 export const brandType = pgEnum("brand_type", ["imported", "mastercopy", "firstcopy", "local"]);
-// export const noteGroup = pgEnum("note_group", ["citrus", "floral", "woody", "oriental", "fresh", "spicy", "sweet", "musky", "green", "aquatic"]);
 export const gender = pgEnum("gender", ["men", "women", "unisex"]);
-// export const concentration = pgEnum("concentration", ["edt", "edp", "parfum", "extrait", "edc", "oil", "attar"]);
-export const packaging = pgEnum("packaging", ["standard", "tester", "sample", "mini", "gift_set"]);
-// export const notePosition = pgEnum("note_position", ["top", "heart", "base"]);
+export const featureGroup = pgEnum("feature_group", ["display", "complications", "durability", "movement", "case", "strap"]);
+export const condition = pgEnum("product_condition", ["new", "open_box", "refurbished", "used"]);
 export const orderStatus = pgEnum("order_status", ["pending", "confirmed", "packed", "shipped", "delivered", "cancelled", "returned"]);
 export type OrderStatus = (typeof orderStatus.enumValues)[number];
 export const paymentMethod = pgEnum("payment_method", ["cod", "bkash", "nagad"]);
@@ -24,21 +22,22 @@ export const homepageSectionType = pgEnum("homepage_section_type", ["hero", "cat
 export const couponType = pgEnum("coupon_type", ["percent", "fixed"]);
 export const reviewStatus = pgEnum("review_status", ["pending", "approved", "rejected"]);
 export const orderNumberSequence = pgSequence("order_number_seq", { startWith: 1001, increment: 1 });
-export const movement = pgEnum("movement", ["quartz", "automatic", "mechanical", "solar", "digital"]);
-export const caseMaterial = pgEnum("case_material", ["stainless_steel", "alloy", "titanium", "gold_plated", "plastic"]);
+export const movement = pgEnum("movement", ["quartz", "automatic", "mechanical", "solar", "digital", "smart"]);
+export const caseMaterial = pgEnum("case_material", ["stainless_steel", "alloy", "titanium", "ceramic", "gold_plated", "plastic"]);
 export const strapType = pgEnum("strap_type", ["leather", "steel", "mesh", "rubber", "silicone", "fabric"]);
 
 /** Saved URL filter values. Phase 2 validates these in the shared catalog query layer. */
 export type CatalogFilters = {
   brand?: string[]; brandType?: (typeof brandType.enumValues)[number][];
   gender?: (typeof gender.enumValues)[number][];
-  packaging?: (typeof packaging.enumValues)[number][];
-  // family?: string[]; note?: string[];
+  condition?: (typeof condition.enumValues)[number][];
   movement?: (typeof movement.enumValues)[number][];
   style?: string;
   material?: (typeof caseMaterial.enumValues)[number][];
   strap?: (typeof strapType.enumValues)[number][];
-  size?: ("under-36" | "36-40" | "45-plus")[];
+  dial?: string[]; glass?: string[];
+  feature?: string[];
+  size?: ("under-36" | "36-40" | "41-44" | "45-plus")[];
   water?: number;
   minPrice?: number; maxPrice?: number;
   inStock?: boolean; deal?: boolean; q?: string;
@@ -64,9 +63,9 @@ export const collections = pgTable("collections", {
   heroImageUrl: text("hero_image_url"), filterJson: jsonb("filter_json").$type<CatalogFilters>().notNull().default({}),
   sortOrder: integer("sort_order").notNull().default(0), isActive: boolean("is_active").notNull().default(true), ...timestamps(),
 });
-// export const notes = pgTable("notes", {
-//   id: id(), name: text("name").notNull().unique(), slug: text("slug").notNull().unique(), group: noteGroup("group").notNull(), ...timestamps(),
-// }, (t) => [index("notes_group_idx").on(t.group)]);
+export const features = pgTable("features", {
+  id: id(), name: text("name").notNull().unique(), slug: text("slug").notNull().unique(), group: featureGroup("group").notNull(), ...timestamps(),
+}, (t) => [index("features_group_idx").on(t.group)]);
 export const products = pgTable("products", {
   id: id(),
   name: text("name").notNull(),
@@ -75,7 +74,7 @@ export const products = pgTable("products", {
   collectionName: text("collection_name"),
   description: text("description").notNull().default(""),
   gender: gender("gender").notNull(),
-  packaging: packaging("packaging").notNull().default("standard"),
+  condition: condition("condition").notNull().default("new"),
   movement: movement("movement").notNull(),
   style: text("style"),                       // dress | sport | casual | digital
   caseSizeMm: integer("case_size_mm"),
@@ -86,9 +85,6 @@ export const products = pgTable("products", {
   dialColor: text("dial_color"),
   referenceNo: text("reference_no"),
   warrantyMonths: integer("warranty_months"),
-  features: text("features").array().notNull().default(sql`'{}'::text[]`),
-  // fragranceFamily: text("fragrance_family"),
-  // perfumer: text("perfumer"),
   launchYear: integer("launch_year"),
   countryOfOrigin: text("country_of_origin"),
   groundShippingOnly: boolean("ground_shipping_only").notNull().default(false),
@@ -98,41 +94,36 @@ export const products = pgTable("products", {
 }, (t) => [
   index("products_brand_idx").on(t.brandId),
   index("products_gender_idx").on(t.gender),
-  index("products_packaging_idx").on(t.packaging),
+  index("products_condition_idx").on(t.condition),
   index("products_movement_idx").on(t.movement),
   index("products_style_idx").on(t.style),
   index("products_case_size_idx").on(t.caseSizeMm),
-  // index("products_family_idx").on(t.fragranceFamily),
   index("products_active_created_idx").on(t.isActive, t.createdAt),
   index("products_featured_idx").on(t.isFeatured),
   check("products_caseSize_Mm_check", sql`${t.caseSizeMm} IS NULL OR ${t.caseSizeMm} > 0`),
   check("products_water_check", sql`${t.waterResistanceM} IS NULL OR ${t.waterResistanceM} >= 0`),
   check("products_warrantyMonths_check", sql`${t.warrantyMonths} IS NULL OR ${t.warrantyMonths} >= 0`),
-  // check("products_size_check", sql`${productVariants.sizeLabel  text("size_label").notNull().default("Standard")`)
 ]);
-// export const productNotes = pgTable("product_notes", {
-//   productId: text("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
-//   noteId: text("note_id").notNull().references(() => notes.id, { onDelete: "restrict" }),
-//   position: notePosition("position").notNull(), ...timestamps(),
-// }, (t) => [primaryKey({ columns: [t.productId, t.noteId, t.position] }), index("product_notes_note_idx").on(t.noteId, t.productId)]);
+export const productFeatures = pgTable("product_features", {
+  productId: text("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  featureId: text("feature_id").notNull().references(() => features.id, { onDelete: "restrict" }),
+  ...timestamps(),
+}, (t) => [primaryKey({ columns: [t.productId, t.featureId] }), index("product_features_feature_idx").on(t.featureId, t.productId)]);
 export const productVariants = pgTable("product_variants", {
   id: id(), productId: text("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
   sku: text("sku").notNull().unique(),
-  // sizeMl: integer("size_ml").notNull(),
-  sizeLabel: text("size_label"),
+  optionLabel: text("option_label"),
   retailPrice: integer("retail_price").notNull(), price: integer("price").notNull(), costPrice: integer("cost_price"),
   stockQuantity: integer("stock_quantity").notNull().default(0), lowStockOverride: integer("low_stock_override"), barcode: text("barcode"),
   isDefault: boolean("is_default").notNull().default(false), isActive: boolean("is_active").notNull().default(true), ...timestamps(),
 }, (t) => [
   index("variants_product_idx").on(t.productId),
   index("variants_price_idx").on(t.price),
-  // index("variants_size_idx").on(t.sizeMl),
   index("variants_stock_idx").on(t.stockQuantity),
   uniqueIndex("variants_one_default_idx").on(t.productId).where(sql`${t.isDefault} = true`),
   check("variants_price_check", sql`${t.price} >= 0 AND ${t.price} <= ${t.retailPrice}`),
   check("variants_cost_check", sql`${t.costPrice} IS NULL OR ${t.costPrice} >= 0`),
   check("variants_stock_check", sql`${t.stockQuantity} >= 0`),
-  // check("variants_size_check", sql`${t.sizeMl} > 0`),
   check("variants_low_stock_check", sql`${t.lowStockOverride} IS NULL OR ${t.lowStockOverride} >= 0`),
 ]);
 export const productImages = pgTable("product_images", {
@@ -250,8 +241,9 @@ export const sandboxUploads = pgTable("sandbox_uploads", {
  * if a table is added to this file without being listed in one of the two.
  */
 export const sandboxTables = [
-  brands, collections, products,productVariants, productImages, customers, orders, orderItems,
-  orderEvents, banners, homepageSections, staticPages, settings, coupons, reviews, sandboxUploads,
+  brands, collections, products, productVariants, productImages, features, productFeatures,
+  customers, orders, orderItems, orderEvents, banners, homepageSections, staticPages, settings,
+  coupons, reviews, sandboxUploads,
 ] as const;
 export const publicOnlyTables = [user, session, account, verification, rateLimits, demoSandboxes] as const;
 /** Sequences a sandbox gets its own copy of. */
@@ -259,12 +251,14 @@ export const sandboxSequences = [orderNumberSequence] as const;
 
 export const brandsRelations = relations(brands, ({ many }) => ({ products: many(products) }));
 export const productsRelations = relations(products, ({ one, many }) => ({
-  brand: one(brands, { fields: [products.brandId], references: [brands.id] }), variants: many(productVariants), images: many(productImages), reviews: many(reviews),
+  brand: one(brands, { fields: [products.brandId], references: [brands.id] }), variants: many(productVariants), images: many(productImages),
+  features: many(productFeatures), reviews: many(reviews),
 }));
-// export const notesRelations = relations(notes, ({ many }) => ({ products: many(productNotes) }));
-// export const productNotesRelations = relations(productNotes, ({ one }) => ({
-//   product: one(products, { fields: [productNotes.productId], references: [products.id] }), note: one(notes, { fields: [productNotes.noteId], references: [notes.id] }),
-// }));
+export const featuresRelations = relations(features, ({ many }) => ({ products: many(productFeatures) }));
+export const productFeaturesRelations = relations(productFeatures, ({ one }) => ({
+  product: one(products, { fields: [productFeatures.productId], references: [products.id] }),
+  feature: one(features, { fields: [productFeatures.featureId], references: [features.id] }),
+}));
 export const productVariantsRelations = relations(productVariants, ({ one, many }) => ({ product: one(products, { fields: [productVariants.productId], references: [products.id] }), orderItems: many(orderItems) }));
 export const productImagesRelations = relations(productImages, ({ one }) => ({ product: one(products, { fields: [productImages.productId], references: [products.id] }) }));
 export const customersRelations = relations(customers, ({ many }) => ({ orders: many(orders) }));
