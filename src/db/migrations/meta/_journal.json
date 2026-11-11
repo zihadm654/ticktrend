@@ -43,6 +43,13 @@
       "when": 1790501564141,
       "tag": "0005_drop_unused_name_gin",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794336319994,
+      "tag": "0006_deep_pestilence",
+      "breakpoints": true
     }
   ]
 }
