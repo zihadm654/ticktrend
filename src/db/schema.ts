@@ -32,7 +32,7 @@ export type CatalogFilters = {
   gender?: (typeof gender.enumValues)[number][];
   condition?: (typeof condition.enumValues)[number][];
   movement?: (typeof movement.enumValues)[number][];
-  style?: string;
+  style?: string[];
   material?: (typeof caseMaterial.enumValues)[number][];
   strap?: (typeof strapType.enumValues)[number][];
   dial?: string[]; glass?: string[];

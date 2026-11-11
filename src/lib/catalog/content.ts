@@ -26,7 +26,7 @@ export const getNavigation = cache(async () => {
   ]);
   return { brands: brandRows, collections: collectionRows, pages };
 });
-/** One lead fragrance per brand (featured first, then newest) for the header brand menu. */
+/** One lead watch per brand (featured first, then newest) for the header brand menu. */
 export const getBrandSpotlights = cache(async () => {
   const rows = await db
     .selectDistinctOn([products.brandId], {

@@ -1,23 +1,36 @@
 import { z } from "@/lib/zod";
+import {
+  brandType,
+  caseMaterial,
+  condition,
+  gender,
+  movement,
+  strapType,
+} from "@/db/schema";
 export { labels, label } from "./labels";
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 const list = z.array(z.string().min(1).max(120)).max(100).default([]);
+const enumList = <T extends readonly [string, ...string[]]>(values: T) =>
+  z.array(z.enum(values)).max(100).default([]);
 export const catalogParamsSchema = z.object({
   brand: list,
-  brandType: z
-    .array(z.enum(["designer", "niche", "arabian", "celebrity", "local"]))
+  brandType: enumList(brandType.enumValues),
+  gender: enumList(gender.enumValues),
+  movement: enumList(movement.enumValues),
+  material: enumList(caseMaterial.enumValues),
+  strap: enumList(strapType.enumValues),
+  dial: list,
+  glass: list,
+  style: list,
+  condition: enumList(condition.enumValues),
+  feature: list,
+  size: z
+    .array(z.enum(["under-36", "36-40", "41-44", "45-plus"]))
+    .max(100)
     .default([]),
-  gender: z.array(z.enum(["men", "women", "unisex"])).default([]),
-  concentration: z
-    .array(z.enum(["edt", "edp", "parfum", "extrait", "edc", "oil", "attar"]))
-    .default([]),
-  packaging: z
-    .array(z.enum(["standard", "tester", "sample", "mini", "gift_set"]))
-    .default([]),
-  family: list,
-  note: list,
-  size: z.array(z.enum(["under-50", "50-99", "100-plus"])).default([]),
+  /** Minimum water resistance in metres. */
+  water: z.number().int().min(0).max(10000).optional(),
   minPrice: z.number().int().min(0).max(2147483647).optional(),
   maxPrice: z.number().int().min(0).max(2147483647).optional(),
   inStock: z.boolean().default(false),
@@ -34,12 +47,18 @@ export const listKeys = [
   "brand",
   "brandType",
   "gender",
-  "concentration",
-  "packaging",
-  "family",
-  "note",
+  "movement",
+  "material",
+  "strap",
+  "dial",
+  "glass",
+  "style",
+  "condition",
+  "feature",
   "size",
 ] as const;
+const numberKeys = ["page", "minPrice", "maxPrice", "water"] as const;
+const booleanKeys = ["inStock", "deal", "new"] as const;
 export function parseCatalogParams(
   raw: Record<string, unknown> = {},
 ): CatalogParams {
@@ -49,9 +68,9 @@ export function parseCatalogParams(
     if (value === undefined || value === "") continue;
     if ((listKeys as readonly string[]).includes(key))
       normalized[key] = Array.isArray(value) ? value : [value];
-    else if (["page", "minPrice", "maxPrice"].includes(key))
+    else if ((numberKeys as readonly string[]).includes(key))
       normalized[key] = Number(Array.isArray(value) ? value[0] : value);
-    else if (["inStock", "deal", "new"].includes(key))
+    else if ((booleanKeys as readonly string[]).includes(key))
       normalized[key] = value === true || value === "true";
     else normalized[key] = Array.isArray(value) ? value[0] : value;
   }

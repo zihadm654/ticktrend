@@ -12,26 +12,27 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { cache } from "react";
 import { db } from "@/db";
 import {
   brands,
+  features,
+  productFeatures,
+  productImages,
   products,
   productVariants as variants,
-  productImages,
-  productNotes,
-  notes,
 } from "@/db/schema";
 import { storeConfig } from "../../../store.config";
 import { parseCatalogParams, type CatalogParams } from "./params";
+import { label, waterBuckets, waterLabel } from "./labels";
 import { getRatingsFor } from "@/lib/reviews/server";
 
 export type PublicVariant = Pick<
   typeof variants.$inferSelect,
   | "id"
   | "sku"
-  | "sizeMl"
-  | "sizeLabel"
+  | "optionLabel"
   | "price"
   | "retailPrice"
   | "stockQuantity"
@@ -44,12 +45,14 @@ export type ProductCardData = {
   name: string;
   slug: string;
   brand: { name: string; slug: string };
-  concentration: string;
+  movement: string;
+  caseSizeMm: number | null;
   image: { url: string; alt: string } | null;
   hoverImage: { url: string; alt: string } | null;
+  /** Default or cheapest option that satisfies the active filters. */
   variant: PublicVariant;
-  /** Sizes on offer (within the active filters on listings). */
-  sizes: number;
+  /** Options on offer (within the active filters on listings). */
+  options: number;
   hasStock: boolean;
   /** Approved-review aggregate; absent when reviews are off or none exist. */
   rating?: { average: number; count: number };
@@ -57,8 +60,7 @@ export type ProductCardData = {
 const publicVariantColumns = {
   id: true,
   sku: true,
-  sizeMl: true,
-  sizeLabel: true,
+  optionLabel: true,
   price: true,
   retailPrice: true,
   stockQuantity: true,
@@ -67,6 +69,7 @@ const publicVariantColumns = {
   isDefault: true,
 } as const;
 const escapeLike = (value: string) => value.replace(/[\\%_]/g, "\\$&");
+/** Only price, stock and deal narrow which option is purchased; case size is a product spec. */
 function variantWhere(p: CatalogParams): SQL {
   const conditions: SQL[] = [eq(variants.isActive, true)];
   if (p.minPrice !== undefined)
@@ -75,19 +78,17 @@ function variantWhere(p: CatalogParams): SQL {
     conditions.push(lte(variants.price, p.maxPrice));
   if (p.inStock) conditions.push(sql`${variants.stockQuantity} > 0`);
   if (p.deal) conditions.push(sql`${variants.price} < ${variants.retailPrice}`);
-  if (p.size.length)
-    conditions.push(
-      or(
-        ...p.size.map((size) =>
-          size === "under-50"
-            ? sql`${variants.sizeMl} < 50`
-            : size === "50-99"
-              ? sql`${variants.sizeMl} between 50 and 99`
-              : sql`${variants.sizeMl} >= 100`,
-        ),
-      )!,
-    );
   return and(...conditions)!;
+}
+/** Case-size buckets read the product, not its options. */
+function caseSizeWhere(bucket: CatalogParams["size"][number]): SQL {
+  return bucket === "under-36"
+    ? sql`${products.caseSizeMm} < 36`
+    : bucket === "36-40"
+      ? sql`${products.caseSizeMm} between 36 and 40`
+      : bucket === "41-44"
+        ? sql`${products.caseSizeMm} between 41 and 44`
+        : sql`${products.caseSizeMm} >= 45`;
 }
 /** Product AND variant predicates compose once. Variant constraints must match the same variant. */
 export function catalogWhere(p: CatalogParams): SQL {
@@ -104,23 +105,31 @@ export function catalogWhere(p: CatalogParams): SQL {
   if (p.brandType.length)
     conditions.push(inArray(brands.brandType, p.brandType));
   if (p.gender.length) conditions.push(inArray(products.gender, p.gender));
-  if (p.concentration.length)
-    conditions.push(inArray(products.concentration, p.concentration));
-  if (p.packaging.length)
-    conditions.push(inArray(products.packaging, p.packaging));
-  if (p.family.length)
-    conditions.push(inArray(products.fragranceFamily, p.family));
-  if (p.note.length)
+  if (p.condition.length)
+    conditions.push(inArray(products.condition, p.condition));
+  if (p.movement.length)
+    conditions.push(inArray(products.movement, p.movement));
+  if (p.style.length) conditions.push(inArray(products.style, p.style));
+  if (p.material.length)
+    conditions.push(inArray(products.caseMaterial, p.material));
+  if (p.strap.length) conditions.push(inArray(products.strapType, p.strap));
+  if (p.dial.length) conditions.push(inArray(products.dialColor, p.dial));
+  if (p.glass.length) conditions.push(inArray(products.glass, p.glass));
+  if (p.size.length)
+    conditions.push(or(...p.size.map(caseSizeWhere))!);
+  if (p.water !== undefined)
+    conditions.push(gte(products.waterResistanceM, p.water));
+  if (p.feature.length)
     conditions.push(
       exists(
         db
-          .select({ id: productNotes.noteId })
-          .from(productNotes)
-          .innerJoin(notes, eq(notes.id, productNotes.noteId))
+          .select({ id: productFeatures.featureId })
+          .from(productFeatures)
+          .innerJoin(features, eq(features.id, productFeatures.featureId))
           .where(
             and(
-              eq(productNotes.productId, products.id),
-              inArray(notes.slug, p.note),
+              eq(productFeatures.productId, products.id),
+              inArray(features.slug, p.feature),
             ),
           ),
       ),
@@ -140,10 +149,28 @@ export function catalogWhere(p: CatalogParams): SQL {
         ilike(brands.name, term),
         ilike(products.description, term),
         ilike(products.collectionName, term),
+        ilike(products.referenceNo, term),
       )!,
     );
   }
   return and(...conditions)!;
+}
+/** The card shows the default option when it is buyable, otherwise the cheapest. */
+function cardVariant(items: PublicVariant[], sort: CatalogParams["sort"]) {
+  const cheapest = [...items].sort((a, b) => a.price - b.price)[0];
+  if (sort === "price-asc" || sort === "price-desc") return cheapest;
+  if (sort === "discount")
+    return [...items].sort(
+      (a, b) =>
+        (b.retailPrice - b.price) / (b.retailPrice || 1) -
+        (a.retailPrice - a.price) / (a.retailPrice || 1),
+    )[0];
+  return (
+    items.find((v) => v.isDefault && v.stockQuantity > 0) ??
+    items.find((v) => v.stockQuantity > 0) ??
+    items.find((v) => v.isDefault) ??
+    cheapest
+  );
 }
 export async function queryCatalog(
   raw: Record<string, unknown> = {},
@@ -152,7 +179,7 @@ export async function queryCatalog(
     limit?: number;
     featured?: boolean;
     excludeId?: string;
-    related?: { brandId: string; noteIds: string[] };
+    related?: { brandId: string; featureIds: string[] };
   } = {},
 ) {
   const params = parseCatalogParams(raw);
@@ -167,13 +194,13 @@ export async function queryCatalog(
         eq(products.brandId, options.related.brandId),
         exists(
           db
-            .select({ id: productNotes.noteId })
-            .from(productNotes)
+            .select({ id: productFeatures.featureId })
+            .from(productFeatures)
             .where(
               and(
-                eq(productNotes.productId, products.id),
-                options.related.noteIds.length
-                  ? inArray(productNotes.noteId, options.related.noteIds)
+                eq(productFeatures.productId, products.id),
+                options.related.featureIds.length
+                  ? inArray(productFeatures.featureId, options.related.featureIds)
                   : sql`false`,
               ),
             ),
@@ -201,7 +228,7 @@ export async function queryCatalog(
             : desc(products.createdAt),
     asc(products.id),
   );
-  // This extra EXISTS makes collection and shopper variant constraints intersect on one SKU.
+  // This extra EXISTS makes collection and shopper variant constraints intersect on one option.
   const combinedWhere = and(
     where,
     exists(
@@ -222,7 +249,10 @@ export async function queryCatalog(
     .from(products)
     .innerJoin(brands, eq(brands.id, products.brandId))
     .where(combinedWhere);
-  const pageSize = options.limit ?? storeConfig.catalog.pageSize;
+  // Related suggestions stay a short strip no matter what the caller asks for.
+  const pageSize = options.related
+    ? Math.min(options.limit ?? 8, 8)
+    : (options.limit ?? storeConfig.catalog.pageSize);
   const pages = Math.max(1, Math.ceil(count.total / pageSize));
   const page = Math.min(params.page, pages);
   const rows = await db
@@ -262,20 +292,12 @@ export async function queryCatalog(
         name: p.name,
         slug: p.slug,
         brand: p.brand,
-        concentration: p.concentration,
+        movement: p.movement,
+        caseSizeMm: p.caseSizeMm,
         image: p.images[0] ?? null,
         hoverImage: p.images[1] ?? null,
-        variant:
-          sort === "price-asc" || sort === "price-desc"
-            ? [...p.variants].sort((a, b) => a.price - b.price)[0]
-            : sort === "discount"
-              ? [...p.variants].sort(
-                  (a, b) =>
-                    (b.retailPrice - b.price) / (b.retailPrice || 1) -
-                    (a.retailPrice - a.price) / (a.retailPrice || 1),
-                )[0]
-              : (p.variants.find((v) => v.stockQuantity > 0) ?? p.variants[0]),
-        sizes: p.variants.length,
+        variant: cardVariant(p.variants, sort),
+        options: p.variants.length,
         hasStock: p.variants.some((v) => v.stockQuantity > 0),
       } satisfies ProductCardData,
     ]),
@@ -324,11 +346,12 @@ export async function getCardsByIds(ids: string[]): Promise<ProductCardData[]> {
           name: p.name,
           slug: p.slug,
           brand: p.brand,
-          concentration: p.concentration,
+          movement: p.movement,
+          caseSizeMm: p.caseSizeMm,
           image: p.images[0] ?? null,
           hoverImage: p.images[1] ?? null,
-          variant: p.variants.find((v) => v.stockQuantity > 0) ?? p.variants[0],
-          sizes: p.variants.length,
+          variant: cardVariant(p.variants, "newest"),
+          options: p.variants.length,
           hasStock: p.variants.some((v) => v.stockQuantity > 0),
           ...(ratings.has(p.id) ? { rating: ratings.get(p.id) } : {}),
         } satisfies ProductCardData,
@@ -361,7 +384,7 @@ export async function searchSuggestions(q: string) {
       image: p.image?.url ?? null,
       price: p.variant.price,
       retailPrice: p.variant.retailPrice,
-      size: p.variant.sizeLabel ?? `${p.variant.sizeMl} ml`,
+      option: p.variant.optionLabel,
       hasStock: p.hasStock,
     })),
     brands: brandRows,
@@ -379,14 +402,177 @@ export const getProduct = cache(async (slug: string) =>
       variants: {
         columns: publicVariantColumns,
         where: eq(variants.isActive, true),
-        orderBy: [desc(variants.isDefault), asc(variants.sizeMl)],
+        orderBy: [desc(variants.isDefault), asc(variants.price)],
       },
-      notes: { with: { note: true } },
+      features: { with: { feature: true } },
     },
   }),
 );
 export type ProductDetail = NonNullable<Awaited<ReturnType<typeof getProduct>>>;
 
+type Facet = { value: string; label: string; count: number; group?: string };
+/** Facet groups in watch-shopping order; keys must match catalog URL params. */
+export const facetGroups = [
+  "brand",
+  "brandType",
+  "gender",
+  "movement",
+  "material",
+  "strap",
+  "dial",
+  "glass",
+  "style",
+  "condition",
+  "size",
+  "feature",
+  "water",
+] as const;
+const facetColumns = {
+  brandType: brands.brandType,
+  gender: products.gender,
+  movement: products.movement,
+  material: products.caseMaterial,
+  strap: products.strapType,
+  dial: products.dialColor,
+  glass: products.glass,
+  style: products.style,
+  condition: products.condition,
+} as const;
+/** Products matching every constraint except the facet's own selection. */
+function matchedQuery(p: CatalogParams, scope: CatalogParams) {
+  return db
+    .select({ id: products.id })
+    .from(products)
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(
+      and(
+        catalogWhere(p),
+        catalogWhere(scope),
+        exists(
+          db
+            .select({ id: variants.id })
+            .from(variants)
+            .where(
+              and(
+                eq(variants.productId, products.id),
+                variantWhere(p),
+                variantWhere(scope),
+              ),
+            ),
+        ),
+      ),
+    );
+}
+type MatchedQuery = ReturnType<typeof matchedQuery>;
+async function brandFacet(matched: MatchedQuery): Promise<Facet[]> {
+  return db
+    .select({
+      value: brands.slug,
+      label: brands.name,
+      // One row per product (products → brands is many-to-one), so no distinct needed.
+      count: sql<number>`count(*)::int`,
+    })
+    .from(products)
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(inArray(products.id, matched))
+    .groupBy(brands.slug, brands.name)
+    .orderBy(asc(brands.name));
+}
+async function columnFacet(
+  column: AnyPgColumn,
+  matched: MatchedQuery,
+): Promise<Facet[]> {
+  const rows = await db
+    .select({
+      value: column,
+      label: column,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(products)
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(inArray(products.id, matched))
+    .groupBy(column)
+    .orderBy(asc(column));
+  return rows.flatMap((row) =>
+    row.value === null || row.label === null
+      ? []
+      : [
+          {
+            value: String(row.value),
+            label: String(row.label),
+            count: row.count,
+          },
+        ],
+  );
+}
+/** Case-size buckets: under 36, 36–40, 41–44, 45+ millimetres. */
+async function sizeFacet(matched: MatchedQuery): Promise<Facet[]> {
+  const bucket = sql<string>`case when ${products.caseSizeMm} < 36 then 'under-36' when ${products.caseSizeMm} <= 40 then '36-40' when ${products.caseSizeMm} <= 44 then '41-44' else '45-plus' end`;
+  const rows = await db
+    .select({ value: bucket, count: sql<number>`count(*)::int` })
+    .from(products)
+    .innerJoin(brands, eq(brands.id, products.brandId))
+    .where(
+      and(
+        inArray(products.id, matched),
+        sql`${products.caseSizeMm} is not null`,
+      ),
+    )
+    .groupBy(bucket);
+  const order = ["under-36", "36-40", "41-44", "45-plus"];
+  return rows
+    .map((row) => ({
+      value: row.value,
+      label: label(row.value),
+      count: row.count,
+    }))
+    .sort((a, b) => order.indexOf(a.value) - order.indexOf(b.value));
+}
+/** Grouped feature facets; the UI renders the subheading from `group`. */
+async function featureFacet(matched: MatchedQuery): Promise<Facet[]> {
+  const pairs = db
+    .selectDistinct({
+      featureId: productFeatures.featureId,
+      productId: productFeatures.productId,
+    })
+    .from(productFeatures)
+    .where(inArray(productFeatures.productId, matched))
+    .as("feature_pairs");
+  return db
+    .select({
+      value: features.slug,
+      label: features.name,
+      group: features.group,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(pairs)
+    .innerJoin(features, eq(features.id, pairs.featureId))
+    .groupBy(features.id)
+    .orderBy(asc(features.group), asc(features.name));
+}
+/** Useful minimums, so "100 m+" means the watch survives at least 100 m. */
+async function waterFacet(matched: MatchedQuery): Promise<Facet[]> {
+  const options = await Promise.all(
+    waterBuckets.map(async (metres) => {
+      const [row] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(products)
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .where(
+          and(
+            inArray(products.id, matched),
+            gte(products.waterResistanceM, metres),
+          ),
+        );
+      return {
+        value: String(metres),
+        label: waterLabel(metres),
+        count: row.count,
+      };
+    }),
+  );
+  return options.filter((option) => option.count > 0);
+}
 /** Counts reflect all current constraints except the facet's own selection. */
 export async function getFacets(
   raw: Record<string, unknown>,
@@ -394,110 +580,21 @@ export async function getFacets(
 ) {
   const p = parseCatalogParams(raw),
     scope = parseCatalogParams(scopeRaw);
-  const groups = [
-    "brand",
-    "brandType",
-    "gender",
-    "concentration",
-    "packaging",
-    "family",
-    "note",
-    "size",
-  ] as const;
-  type Facet = { value: string; label: string; count: number; group?: string };
   // Independent queries: run them together instead of one round trip after another.
-  const counts = await Promise.all(groups.map(async (key): Promise<Facet[]> => {
-    const own = { ...p, [key]: [] };
-    const matched = db
-      .select({ id: products.id })
-      .from(products)
-      .innerJoin(brands, eq(brands.id, products.brandId))
-      .where(
-        and(
-          catalogWhere(own),
-          catalogWhere(scope),
-          exists(
-            db
-              .select({ id: variants.id })
-              .from(variants)
-              .where(
-                and(
-                  eq(variants.productId, products.id),
-                  variantWhere(own),
-                  variantWhere(scope),
-                ),
-              ),
-          ),
-        ),
-      );
-    // count(distinct) always sorts; de-duplicating first lets Postgres hash instead.
-    if (key === "note") {
-      const pairs = db
-        .selectDistinct({ noteId: productNotes.noteId, productId: productNotes.productId })
-        .from(productNotes)
-        .where(inArray(productNotes.productId, matched))
-        .as("note_pairs");
-      return db
-        .select({
-          value: notes.slug,
-          label: notes.name,
-          group: notes.group,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(pairs)
-        .innerJoin(notes, eq(notes.id, pairs.noteId))
-        .groupBy(notes.id)
-        .orderBy(asc(notes.group), asc(notes.name));
-    }
-    if (key === "size") {
-      const bucket = sql<string>`case when ${variants.sizeMl} < 50 then 'under-50' when ${variants.sizeMl} < 100 then '50-99' else '100-plus' end`;
-      const sized = db
-        .selectDistinct({ productId: variants.productId, bucket: bucket.as("bucket") })
-        .from(variants)
-        .where(
-          and(
-            inArray(variants.productId, matched),
-            variantWhere(own),
-            variantWhere(scope),
-          ),
-        )
-        .as("sized");
-      return db
-        .select({
-          value: sized.bucket,
-          label: sized.bucket,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(sized)
-        .groupBy(sized.bucket);
-    }
-    {
-      const value =
-        key === "brand"
-          ? brands.slug
-          : key === "brandType"
-            ? brands.brandType
-            : key === "family"
-              ? products.fragranceFamily
-              : products[key];
-      const name = key === "brand" ? brands.name : value;
-      const rows = await db
-        .select({
-          value,
-          label: name,
-          // One row per product (products → brands is many-to-one), so no distinct needed.
-          count: sql<number>`count(*)::int`,
-        })
-        .from(products)
-        .innerJoin(brands, eq(brands.id, products.brandId))
-        .where(inArray(products.id, matched))
-        .groupBy(value, name)
-        .orderBy(asc(name));
-      return rows.filter(
-        (r): r is { value: string; label: string; count: number } =>
-          r.value !== null && r.label !== null,
-      );
-    }
-  }));
-  return Object.fromEntries(groups.map((key, i) => [key, counts[i]])) as Record<string, Facet[]>;
+  const counts = await Promise.all(
+    facetGroups.map(async (key): Promise<Facet[]> => {
+      // Clearing a selection keeps every other filter; water is a number, not a list.
+      const own: CatalogParams =
+        key === "water" ? { ...p, water: undefined } : { ...p, [key]: [] };
+      const matched = matchedQuery(own, scope);
+      if (key === "brand") return brandFacet(matched);
+      if (key === "feature") return featureFacet(matched);
+      if (key === "size") return sizeFacet(matched);
+      if (key === "water") return waterFacet(matched);
+      return columnFacet(facetColumns[key], matched);
+    }),
+  );
+  return Object.fromEntries(
+    facetGroups.map((key, i) => [key, counts[i]]),
+  ) as Record<string, Facet[]>;
 }

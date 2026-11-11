@@ -7,26 +7,52 @@ import type { CatalogParams } from "./params";
 import { storeConfig } from "../../../store.config";
 async function main() {
   const all = await db.query.products.findMany({
-    with: { brand: true, variants: true, notes: { with: { note: true } } },
+    with: { brand: true, variants: true, features: { with: { feature: true } } },
   });
   assert.ok(all.length > 0, "Seed the database first");
   function expected(p: CatalogParams, scope = parseCatalogParams({})) {
+    const sizeMatches = (
+      mm: number | null,
+      size: CatalogParams["size"][number],
+    ) =>
+      mm !== null &&
+      (size === "under-36"
+        ? mm < 36
+        : size === "36-40"
+          ? mm >= 36 && mm <= 40
+          : size === "41-44"
+            ? mm >= 41 && mm <= 44
+            : mm >= 45);
     function productMatches(row: (typeof all)[number], f: CatalogParams) {
       return (
         row.isActive &&
         (!f.brand.length || f.brand.includes(row.brand.slug)) &&
         (!f.brandType.length || f.brandType.includes(row.brand.brandType)) &&
         (!f.gender.length || f.gender.includes(row.gender)) &&
-        (!f.concentration.length ||
-          f.concentration.includes(row.concentration)) &&
-        (!f.packaging.length || f.packaging.includes(row.packaging)) &&
-        (!f.family.length || f.family.includes(row.fragranceFamily ?? "")) &&
-        (!f.note.length ||
-          row.notes.some((n) => f.note.includes(n.note.slug))) &&
+        (!f.condition.length || f.condition.includes(row.condition)) &&
+        (!f.movement.length || f.movement.includes(row.movement)) &&
+        (!f.style.length ||
+          (row.style !== null && f.style.includes(row.style))) &&
+        (!f.material.length ||
+          (row.caseMaterial !== null && f.material.includes(row.caseMaterial))) &&
+        (!f.strap.length ||
+          (row.strapType !== null && f.strap.includes(row.strapType))) &&
+        (!f.dial.length ||
+          (row.dialColor !== null && f.dial.includes(row.dialColor))) &&
+        (!f.glass.length || (row.glass !== null && f.glass.includes(row.glass))) &&
+        (!f.size.length || f.size.some((size) => sizeMatches(row.caseSizeMm, size))) &&
+        (f.water === undefined ||
+          (row.waterResistanceM !== null && row.waterResistanceM >= f.water)) &&
+        (!f.feature.length ||
+          row.features.some((pf) => f.feature.includes(pf.feature.slug))) &&
         (!f.q ||
-          [row.name, row.brand.name, row.description, row.collectionName].some(
-            (text) => text?.toLowerCase().includes(f.q.toLowerCase()),
-          ))
+          [
+            row.name,
+            row.brand.name,
+            row.description,
+            row.collectionName,
+            row.referenceNo,
+          ].some((text) => text?.toLowerCase().includes(f.q.toLowerCase())))
       );
     }
     function variantMatches(
@@ -38,15 +64,7 @@ async function main() {
         (f.minPrice === undefined || v.price >= f.minPrice) &&
         (f.maxPrice === undefined || v.price <= f.maxPrice) &&
         (!f.inStock || v.stockQuantity > 0) &&
-        (!f.deal || v.price < v.retailPrice) &&
-        (!f.size.length ||
-          f.size.some((s) =>
-            s === "under-50"
-              ? v.sizeMl < 50
-              : s === "50-99"
-                ? v.sizeMl >= 50 && v.sizeMl < 100
-                : v.sizeMl >= 100,
-          ))
+        (!f.deal || v.price < v.retailPrice)
       );
     }
     return all
@@ -61,23 +79,37 @@ async function main() {
       .map((p) => p.id)
       .sort();
   }
+  const firstFeature = all[0].features[0]?.feature.slug;
   const cases = [
     {},
     { gender: "men", inStock: true },
-    { concentration: ["oil", "attar"], deal: true },
-    { size: ["100-plus"], maxPrice: 5000 },
-    { minPrice: 3500, maxPrice: 5500, packaging: ["standard", "tester"] },
+    { movement: ["automatic", "quartz"], deal: true },
+    { size: ["41-44"], maxPrice: 5000 },
+    {
+      minPrice: 3500,
+      maxPrice: 5500,
+      material: ["stainless_steel", "alloy"],
+    },
     { brand: all[0].brand.slug },
-    { note: all[0].notes[0]?.note.slug },
-    { family: all[0].fragranceFamily },
-    { brandType: "niche", gender: "women" },
+    { feature: firstFeature },
+    { style: all[0].style },
+    { brandType: "imported", gender: "women" },
+    { water: 100 },
+    { condition: ["new"] },
+    { dial: all[0].dialColor },
     { q: all[0].brand.name },
+    { q: all[0].referenceNo },
     { q: "%" },
-    { q: "no-such-fragrance" },
+    { q: "no-such-watch" },
     { minPrice: 9999, maxPrice: 1 },
   ];
   // Totals must always match; full ID lists only when every match fits on one page.
-  const sameListing = (items: { id: string }[], total: number, want: string[], label: string) => {
+  const sameListing = (
+    items: { id: string }[],
+    total: number,
+    want: string[],
+    label: string,
+  ) => {
     assert.equal(total, want.length, label);
     const got = items.map((p) => p.id).sort();
     if (want.length <= 100) assert.deepEqual(got, want, label);
@@ -85,12 +117,22 @@ async function main() {
   };
   for (const raw of cases) {
     const result = await queryCatalog(raw, { limit: 100 });
-    sameListing(result.items, result.total, expected(parseCatalogParams(raw)), JSON.stringify(raw));
+    sameListing(
+      result.items,
+      result.total,
+      expected(parseCatalogParams(raw)),
+      JSON.stringify(raw),
+    );
   }
-  const scope = { gender: ["men"], minPrice: 4000, size: ["100-plus"] };
+  const scope = { gender: ["men"], minPrice: 4000, size: ["41-44"] };
   const refinement = { maxPrice: 6000, inStock: true };
   const scoped = await queryCatalog(refinement, { scope, limit: 100 });
-  sameListing(scoped.items, scoped.total, expected(parseCatalogParams(refinement), parseCatalogParams(scope)), "scoped");
+  sameListing(
+    scoped.items,
+    scoped.total,
+    expected(parseCatalogParams(refinement), parseCatalogParams(scope)),
+    "scoped",
+  );
   const conflicting = await queryCatalog(
     { gender: "women" },
     { scope: { gender: ["men"] } },
@@ -107,7 +149,7 @@ async function main() {
     { sort: "price-asc", inStock: true },
     { limit: 100 },
   );
-  // Compare SQL ordering to minimum qualifying price, independent of which default SKU is displayed.
+  // Compare SQL ordering to minimum qualifying price, independent of which default option is displayed.
   const minimums = priceAsc.items.map((p) =>
     Math.min(
       ...all
@@ -120,28 +162,36 @@ async function main() {
     minimums,
     [...minimums].sort((a, b) => a - b),
   );
-  const facets = await getFacets({ gender: "men", deal: "true" });
-  for (const facet of facets.brand)
-    assert.equal(
-      facet.count,
-      expected(
-        parseCatalogParams({ gender: "men", deal: true, brand: facet.value }),
-      ).length,
-    );
-  // Every facet count must equal the listing total after picking that value
+  // Every option in every facet must equal the listing total after picking it
   // (counts ignore the facet's own selection, so start from a cleared group).
-  for (const base of [{}, { gender: "women", inStock: "true" }, { note: "oud", size: "100-plus" }]) {
+  for (const base of [
+    {},
+    { gender: "women", inStock: "true" },
+    { feature: firstFeature, size: "41-44" },
+    { movement: "automatic", water: "100" },
+  ]) {
     const facetsFor = await getFacets(base);
     for (const [group, options] of Object.entries(facetsFor)) {
       for (const option of options) {
-        const picked = await queryCatalog({ ...base, [group]: option.value, page: "1" });
-        assert.equal(option.count, picked.total, `${JSON.stringify(base)} ${group}=${option.value}`);
+        const picked = await queryCatalog({
+          ...base,
+          [group]: option.value,
+          page: "1",
+        });
+        assert.equal(
+          option.count,
+          picked.total,
+          `${JSON.stringify(base)} ${group}=${option.value}`,
+        );
       }
     }
+    for (const option of facetsFor.feature)
+      assert.ok(option.group, "feature facets carry their group");
   }
   const product = await getProduct(all[0].slug);
   assert.ok(product);
   assert.ok(!("costPrice" in product.variants[0]));
+  assert.ok(Array.isArray(product.features));
   const related = await queryCatalog(
     {},
     {
@@ -149,14 +199,15 @@ async function main() {
       limit: 8,
       related: {
         brandId: product.brandId,
-        noteIds: product.notes.map((n) => n.noteId),
+        featureIds: product.features.map((f) => f.featureId),
       },
     },
   );
+  assert.ok(related.items.length <= 8);
   assert.ok(!related.items.some((p) => p.id === product.id));
   assert.equal(await getProduct("not-a-real-product"), undefined);
   console.log(
-    `Catalog verification passed: ${cases.length} filter/search cases, scope intersections, pagination, sorting, facets, public variant fields, related products and 404 lookup.`,
+    `Catalog verification passed: ${cases.length} watch filter/search cases, scope intersections, pagination, sorting, facets, public option fields, features and related watches.`,
   );
 }
 main()
