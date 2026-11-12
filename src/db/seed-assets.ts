@@ -1,43 +1,103 @@
 /** Reproduce committed SVG fixtures with: node --import tsx src/db/seed-assets.ts */
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { demoBrands, demoProducts } from "./seed-data";
 import { slugify } from "@/lib/slug";
 
 const escapeXml = (value: string) => value.replace(/[<>&"']/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" })[char]!);
-function artwork(title: string, subtitle: string, color: string, wide = false, detail = false) {
-  const words = title.split(" ");
-  const split = Math.ceil(words.length / 2);
-  const labelLines = [words.slice(0, split).join(" "), words.slice(split).join(" ")].filter(Boolean);
+
+const straps: Record<string, { light: string; dark: string }> = {
+  leather: { light: "#8a5f3f", dark: "#5c3d28" },
+  steel: { light: "#c3c9d0", dark: "#8f969e" },
+  mesh: { light: "#aab1b8", dark: "#6f767e" },
+  rubber: { light: "#4c5359", dark: "#2f3438" },
+  silicone: { light: "#5d6d78", dark: "#3c4a52" },
+  fabric: { light: "#828a76", dark: "#5b6151" },
+};
+
+/**
+ * An original still-life illustration of a fictional wristwatch: a strap band
+ * behind a metallic case, a dial colour drawn from the brand, twelve markers,
+ * hands at ten past ten and a date window. Deterministic per title.
+ */
+function artwork(
+  title: string,
+  subtitle: string,
+  color: string,
+  options: { wide?: boolean; detail?: boolean; strap?: string | null } = {},
+) {
+  const { wide = false, detail = false, strap = null } = options;
   const width = wide ? 1600 : 800;
   const height = wide ? 900 : 960;
   const center = width / 2;
-  const variant = [...title].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
-  const bottleWidth = [220, 250, 190][variant];
-  const bottleHeight = [330, 280, 360][variant];
-  const x = center - bottleWidth / 2;
-  const y = height / 2 - bottleHeight / 2 + 35;
+  const hash = [...title].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const variant = hash % 3;
+  const band = straps[strap ?? "steel"] ?? straps.steel;
+  const caseSize = wide ? 400 : 340;
+  const cy = height / 2 + 18;
+  const caseX = center - caseSize / 2;
+  const caseY = cy - caseSize / 2;
+  const radius = caseSize / 2;
+  const dialRadius = radius - (wide ? 26 : 22);
+  const dialColor = color;
+  const bandWidth = wide ? 150 : 132;
+  const bandTop = height * 0.03;
+  const bandHeight = height * 0.94;
+
+  const hand = (angleDeg: number, length: number, thickness: number) => {
+    const angle = ((angleDeg - 90) * Math.PI) / 180;
+    const x = center + Math.cos(angle) * length;
+    const y = cy + Math.sin(angle) * length;
+    return `<line x1="${center}" y1="${cy}" x2="${x.toFixed(2)}" y2="${y.toFixed(2)}" stroke="#f7f4ec" stroke-width="${thickness}" stroke-linecap="round"/>`;
+  };
+  const markers = Array.from({ length: 12 }, (_, index) => {
+    const angle = ((index * 30 - 90) * Math.PI) / 180;
+    const r1 = dialRadius - 26;
+    const r2 = dialRadius - 12;
+    const x1 = center + Math.cos(angle) * r1;
+    const y1 = cy + Math.sin(angle) * r1;
+    const x2 = center + Math.cos(angle) * r2;
+    const y2 = cy + Math.sin(angle) * r2;
+    return `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="#efeadd" stroke-opacity=".85" stroke-width="${index % 3 === 0 ? 7 : 4}" stroke-linecap="round"/>`;
+  }).join("");
+
+  const caseShape =
+    variant === 0
+      ? `<circle cx="${center}" cy="${cy}" r="${radius}" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
+  <circle cx="${center}" cy="${cy}" r="${dialRadius}" fill="${dialColor}"/>
+  <circle cx="${center}" cy="${cy}" r="${dialRadius}" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>`
+      : variant === 1
+        ? `<rect x="${caseX}" y="${caseY}" width="${caseSize}" height="${caseSize}" rx="52" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
+  <rect x="${center - dialRadius}" y="${cy - dialRadius}" width="${dialRadius * 2}" height="${dialRadius * 2}" rx="40" fill="${dialColor}"/>
+  <rect x="${center - dialRadius}" y="${cy - dialRadius}" width="${dialRadius * 2}" height="${dialRadius * 2}" rx="40" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>`
+        : `<rect x="${caseX}" y="${caseY + 14}" width="${caseSize}" height="${caseSize - 28}" rx="96" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
+  <rect x="${center - dialRadius}" y="${cy - dialRadius + 10}" width="${dialRadius * 2}" height="${dialRadius * 2 - 20}" rx="80" fill="${dialColor}"/>
+  <rect x="${center - dialRadius}" y="${cy - dialRadius + 10}" width="${dialRadius * 2}" height="${dialRadius * 2 - 20}" rx="80" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>`;
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title desc">
-  <title id="title">${escapeXml(title)}</title><desc id="desc">${escapeXml(subtitle)}. Original illustration of a fictional fragrance.</desc>
+  <title id="title">${escapeXml(title)}</title><desc id="desc">${escapeXml(subtitle)}. Original illustration of a fictional wristwatch.</desc>
   <defs>
-    <linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#f6f3ec"/><stop offset="1" stop-color="#e7e2d6"/></linearGradient>
-    <linearGradient id="glass"><stop stop-color="${color}" stop-opacity=".65"/><stop offset=".12" stop-color="#fcfaf3" stop-opacity=".8"/><stop offset=".25" stop-color="${color}" stop-opacity=".55"/><stop offset=".8" stop-color="${color}" stop-opacity=".8"/><stop offset=".95" stop-color="#f8f2dc" stop-opacity=".75"/><stop offset="1" stop-color="${color}"/></linearGradient>
-    <linearGradient id="cap"><stop stop-color="#242820"/><stop offset=".45" stop-color="#555548"/><stop offset="1" stop-color="#22251e"/></linearGradient>
-    <filter id="shadow"><feGaussianBlur stdDeviation="15"/></filter>
+    <linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#f2f3f2"/><stop offset="1" stop-color="#dfe1e0"/></linearGradient>
+    <linearGradient id="band" x1="0" x2="1"><stop stop-color="${band.dark}"/><stop offset=".5" stop-color="${band.light}"/><stop offset="1" stop-color="${band.dark}"/></linearGradient>
+    <linearGradient id="metal" x2="1" y2="1"><stop stop-color="#e6e9ec"/><stop offset=".35" stop-color="#aab1b8"/><stop offset=".62" stop-color="#f4f6f7"/><stop offset="1" stop-color="#8d949b"/></linearGradient>
+    <filter id="shadow"><feGaussianBlur stdDeviation="18"/></filter>
   </defs>
   <rect width="${width}" height="${height}" fill="url(#bg)"/>
-  ${wide ? `<path d="M0 0h${width*.3}L${width*.65} ${height}H${width*.4}Z" fill="#fff" opacity=".3"/><rect x="${center-250}" y="${y+bottleHeight-5}" width="520" height="200" fill="#d9d3c5"/>` : ''}
-  <ellipse cx="${center+38}" cy="${y+bottleHeight+12}" rx="165" ry="24" fill="#49483b" opacity=".19" filter="url(#shadow)"/>
-  <g transform="${detail ? `rotate(8 ${center} ${height/2})` : ''}">
-    <rect x="${center-52}" y="${y-89}" width="104" height="82" rx="4" fill="url(#cap)"/>
-    <rect x="${center-45}" y="${y-12}" width="90" height="18" fill="#b5a27d"/>
-    <rect x="${x}" y="${y}" width="${bottleWidth}" height="${bottleHeight}" rx="${variant===2 ? 55 : 15}" fill="url(#glass)" stroke="#c6c5b7" stroke-width="2"/>
-    <rect x="${x+10}" y="${y+10}" width="${bottleWidth-20}" height="${bottleHeight-21}" rx="${variant===2 ? 46 : 10}" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
-    <path d="M${x+19} ${y+36}v${bottleHeight-90}" stroke="#fff" opacity=".6" stroke-width="5"/>
-    <rect x="${x+24}" y="${y+85}" width="${bottleWidth-48}" height="145" fill="#faf8f0" stroke="#ded9cc"/>
-    <text x="${center}" y="${y+117}" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" letter-spacing="2" fill="#585b4f">FRAGRANCE STUDY</text>
-    ${labelLines.map((word,i) => `<text x="${center}" y="${y+149+i*23}" text-anchor="middle" font-family="Georgia,serif" font-size="21" fill="#34392e">${escapeXml(word)}</text>`).join('')}
-    <path d="M${center-16} ${y+204}h32" stroke="#b6ad92"/>
+  ${wide ? `<path d="M0 0h${width * 0.32}L${width * 0.6} ${height}H${width * 0.34}Z" fill="#fff" opacity=".32"/><rect x="${center - 320}" y="${cy + radius + 60}" width="640" height="260" fill="#d6d9d7"/>` : ""}
+  <ellipse cx="${center + 26}" cy="${cy + radius + 34}" rx="${radius + 40}" ry="26" fill="#3b4147" opacity=".2" filter="url(#shadow)"/>
+  <g transform="${detail ? `rotate(7 ${center} ${cy}) translate(${wide ? 0 : 12} ${wide ? 0 : -8})` : ""}">
+    <rect x="${center - bandWidth / 2}" y="${bandTop}" width="${bandWidth}" height="${bandHeight}" rx="30" fill="url(#band)"/>
+    <line x1="${center - bandWidth / 2 + 16}" y1="${bandTop + 26}" x2="${center - bandWidth / 2 + 16}" y2="${bandTop + bandHeight - 26}" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
+    <line x1="${center + bandWidth / 2 - 16}" y1="${bandTop + 26}" x2="${center + bandWidth / 2 - 16}" y2="${bandTop + bandHeight - 26}" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
+    <rect x="${center + radius + (wide ? 8 : 6)}" y="${cy - (wide ? 26 : 22)}" width="${wide ? 30 : 24}" height="${wide ? 52 : 44}" rx="8" fill="url(#metal)" stroke="#9ba2a9" stroke-width="1.5"/>
+    ${caseShape}
+    ${markers}
+    ${hand(305, dialRadius - 76, 11)}
+    ${hand(60, dialRadius - 52, 7)}
+    <circle cx="${center}" cy="${cy}" r="${wide ? 12 : 10}" fill="#f7f4ec"/>
+    <circle cx="${center}" cy="${cy}" r="${wide ? 5 : 4}" fill="${dialColor}"/>
+    <rect x="${center + dialRadius - 62}" y="${cy - 22}" width="44" height="34" rx="5" fill="#f7f4ec"/>
+    <text x="${center + dialRadius - 40}" y="${cy + 3}" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#3a3f45">${(hash % 28) + 1}</text>
   </g>
 </svg>\n`;
 }
@@ -47,23 +107,28 @@ async function main() {
   await mkdir(directory, { recursive: true });
   const files: [string, string][] = [];
   for (const product of demoProducts) {
-    files.push([`${product.slug}.svg`, artwork(product.name, product.brand.name, product.brand.color)]);
-    files.push([`${product.slug}-detail.svg`, artwork(product.name, `${product.concentration.toUpperCase()} · ${product.brand.name}`, product.brand.color, false, true)]);
+    files.push([`${product.slug}.svg`, artwork(product.name, product.brand.name, product.brand.color, { strap: product.strapType })]);
+    files.push([`${product.slug}-detail.svg`, artwork(product.name, product.optionLabels[1] ?? product.brand.name, product.brand.color, { detail: true, strap: product.strapType })]);
   }
   for (const brand of demoBrands) {
     const slug = slugify(brand.name);
-    files.push([`brand-${slug}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><rect width="800" height="400" fill="#eeeee5"/><text x="400" y="210" text-anchor="middle" font-family="Georgia,serif" font-size="48" fill="#343e32">${escapeXml(brand.name)}</text><path d="M370 252h60" stroke="#919681"/></svg>`]);
-    files.push([`brand-${slug}-hero.svg`, artwork(brand.name, "Explore the collection", brand.color, true)]);
+    files.push([`brand-${slug}.svg`, `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400"><rect width="800" height="400" fill="#eceeed"/><text x="400" y="210" text-anchor="middle" font-family="Georgia,serif" font-size="48" fill="#3b4653">${escapeXml(brand.name)}</text><path d="M370 252h60" stroke="#8f969e"/></svg>`]);
+    files.push([`brand-${slug}-hero.svg`, artwork(brand.name, "Explore the collection", brand.color, { wide: true })]);
   }
   for (const [slug, title, subtitle, color] of [
-    ["men", "For Him", "Woods, citrus and quiet confidence", "#62758a"],
-    ["women", "For Her", "Florals, soft musks and warm amber", "#b4898c"],
-    ["niche", "A Different Direction", "Discover our imagined niche houses", "#73836b"],
-    ["deals", "Everyday Discoveries", "Explore the demo fragrance edit", "#a77f57"],
-    ["hero-discovery", "Find Your Next Fragrance", "Explore the fictional demo collection", "#687a80"],
-    ["hero-oils", "Small Bottles, Rich Notes", "Discover oils and attars", "#9c7950"],
-  ]) files.push([`${slug}.svg`, artwork(title, subtitle, color, true)]);
+    ["men", "For Him", "Field, diver and everyday watches", "#3f4a52"],
+    ["women", "For Her", "Slim cases, dress dials and bracelets", "#9c7f74"],
+    ["automatic", "Mechanical, Not Battery", "Self-winding movements with sweeping seconds", "#5b6657"],
+    ["deals", "Everyday Discoveries", "Watches priced below demo retail", "#a07a4a"],
+    ["hero-field", "Built for Every Wrist", "Case sizes from 34 to 46 mm", "#4d5a64"],
+  ]) files.push([`${slug}.svg`, artwork(title, subtitle, color, { wide: true })]);
+
   await Promise.all(files.map(([name, svg]) => writeFile(join(directory, name), svg)));
+  // Keep the fixture directory exactly reproducible: drop stale artwork from earlier catalogs.
+  const keep = new Set(files.map(([name]) => name));
+  for (const name of await readdir(directory)) {
+    if (name.endsWith(".svg") && !keep.has(name)) await unlink(join(directory, name));
+  }
   console.log(`Generated ${files.length} deterministic SVG fixtures in public/seed/.`);
 }
 

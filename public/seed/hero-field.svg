@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Built for Every Wrist</title><desc id="desc">Case sizes from 34 to 46 mm. Original illustration of a fictional wristwatch.</desc>
+  <defs>
+    <linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#f2f3f2"/><stop offset="1" stop-color="#dfe1e0"/></linearGradient>
+    <linearGradient id="band" x1="0" x2="1"><stop stop-color="#8f969e"/><stop offset=".5" stop-color="#c3c9d0"/><stop offset="1" stop-color="#8f969e"/></linearGradient>
+    <linearGradient id="metal" x2="1" y2="1"><stop stop-color="#e6e9ec"/><stop offset=".35" stop-color="#aab1b8"/><stop offset=".62" stop-color="#f4f6f7"/><stop offset="1" stop-color="#8d949b"/></linearGradient>
+    <filter id="shadow"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <path d="M0 0h512L960 900H544Z" fill="#fff" opacity=".32"/><rect x="480" y="728" width="640" height="260" fill="#d6d9d7"/>
+  <ellipse cx="826" cy="702" rx="240" ry="26" fill="#3b4147" opacity=".2" filter="url(#shadow)"/>
+  <g transform="">
+    <rect x="725" y="27" width="150" height="846" rx="30" fill="url(#band)"/>
+    <line x1="741" y1="53" x2="741" y2="847" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
+    <line x1="859" y1="53" x2="859" y2="847" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
+    <rect x="1008" y="442" width="30" height="52" rx="8" fill="url(#metal)" stroke="#9ba2a9" stroke-width="1.5"/>
+    <circle cx="800" cy="468" r="200" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
+  <circle cx="800" cy="468" r="174" fill="#4d5a64"/>
+  <circle cx="800" cy="468" r="174" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>
+    <line x1="800.00" y1="320.00" x2="800.00" y2="306.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="874.00" y1="339.83" x2="881.00" y2="327.70" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="928.17" y1="394.00" x2="940.30" y2="387.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="948.00" y1="468.00" x2="962.00" y2="468.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="928.17" y1="542.00" x2="940.30" y2="549.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="874.00" y1="596.17" x2="881.00" y2="608.30" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="800.00" y1="616.00" x2="800.00" y2="630.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="726.00" y1="596.17" x2="719.00" y2="608.30" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="671.83" y1="542.00" x2="659.70" y2="549.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="652.00" y1="468.00" x2="638.00" y2="468.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="671.83" y1="394.00" x2="659.70" y2="387.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="726.00" y1="339.83" x2="719.00" y2="327.70" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/>
+    <line x1="800" y1="468" x2="719.72" y2="411.79" stroke="#f7f4ec" stroke-width="11" stroke-linecap="round"/>
+    <line x1="800" y1="468" x2="905.66" y2="407.00" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="800" cy="468" r="12" fill="#f7f4ec"/>
+    <circle cx="800" cy="468" r="5" fill="#4d5a64"/>
+    <rect x="912" y="446" width="44" height="34" rx="5" fill="#f7f4ec"/>
+    <text x="934" y="471" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#3a3f45">8</text>
+  </g>
+</svg>

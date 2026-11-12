@@ -12,7 +12,7 @@ export default async function Login() {
     <main className="admin-login">
       <section className="admin-login-art" aria-hidden>
         <Image
-          src="/editorial/fragrance-still-life.webp"
+          src="/editorial/watch-still-life.webp"
           alt=""
           fill
           fetchPriority="high"
