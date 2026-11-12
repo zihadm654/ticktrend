@@ -2,7 +2,7 @@ import "./load-env";
 import { and, eq, sql } from "drizzle-orm";
 import { hashPassword } from "better-auth/crypto";
 import { db, closeDb, type DbTransaction } from "@/db";
-import { account, banners, brands, collections, coupons, customers, homepageSections, notes, orderEvents, orderItems, orders, productImages, productNotes, products, productVariants, reviews, settings, staticPages, user, type OrderStatus } from "./schema";
+import { account, banners, brands, collections, coupons, customers, features, homepageSections, orderEvents, orderItems, orders, productFeatures, productImages, products, productVariants, reviews, settings, staticPages, user, type OrderStatus } from "./schema";
 import { createId } from "@/lib/id";
 import { env } from "@/lib/env";
 import { formatMoney } from "@/lib/money";
@@ -11,7 +11,7 @@ import { slugify } from "@/lib/slug";
 import { nextOrderNumber } from "@/lib/order-number";
 import { transitionOrderInTransaction } from "@/lib/orders/transitions";
 import { storeConfig } from "../../store.config";
-import { demoBrands, demoMoney, demoNotes, demoProducts, demoSeedKey } from "./seed-data";
+import { demoBrands, demoFeatures, demoMoney, demoProducts, demoSeedKey } from "./seed-data";
 
 const hour = 60 * 60 * 1000;
 const ago = (now: Date, hours: number) => new Date(now.getTime() - hours * hour);
@@ -43,76 +43,75 @@ async function seedCatalog(tx: DbTransaction, now: Date) {
     await tx.insert(brands).values({
       name: brand.name, slug, brandType: brand.brandType,
       logoUrl: `/seed/brand-${slug}.svg`, heroImageUrl: `/seed/brand-${slug}-hero.svg`,
-      description: `${brand.name} is an invented ${brand.brandType} fragrance house in the ${storeConfig.store.name} demo catalog. Its collection explores familiar notes through imagined compositions.`,
+      description: `${brand.name} is an invented ${brand.brandType} watch house in the ${storeConfig.store.name} demo catalog. Its models are fictional, assembled around familiar case shapes and movements.`,
       isFeatured: index % 2 === 0, sortOrder: index, ...dates(ago(now, 100 * 24)),
     }).onConflictDoNothing();
   }
-  await tx.insert(notes).values(demoNotes).onConflictDoNothing();
+  await tx.insert(features).values(demoFeatures).onConflictDoNothing();
   const brandRows = await tx.select().from(brands);
-  const noteRows = await tx.select().from(notes);
+  const featureRows = await tx.select().from(features);
   const brandIds = new Map(brandRows.map((brand) => [brand.slug, brand.id]));
-  const noteIds = new Map(noteRows.map((note) => [note.slug, note.id]));
+  const featureIds = new Map(featureRows.map((feature) => [feature.slug, feature.id]));
 
   for (const product of demoProducts) {
     const { index } = product;
     const createdAt = ago(now, index < 30 ? (90 - index) * 24 : (40 - index) * 24);
     const [inserted] = await tx.insert(products).values({
       name: product.name, slug: product.slug, brandId: brandIds.get(slugify(product.brand.name))!,
-      collectionName: `${product.brand.name.split(" ")[0]} Studies`,
-      description: `## ${product.name}\n\nAn imagined ${product.fragranceFamily.toLowerCase()} composition from ${product.brand.name}. A bright opening settles into a textured heart and a gentle, lasting base.\n\nThis fictional product demonstrates the catalog, notes pyramid and variant selector. Bottle artwork is an original generated placeholder, not a photograph of a commercial fragrance.`,
-      gender: product.gender, concentration: product.concentration, packaging: product.packaging,
-      fragranceFamily: product.fragranceFamily, perfumer: `${product.brand.name} Demo Studio`,
-      launchYear: now.getUTCFullYear() - index % 4, countryOfOrigin: index >= 32 ? "Bangladesh" : "Fictional demo origin",
-      groundShippingOnly: product.packaging === "gift_set", isFeatured: index % 3 === 0,
+      collectionName: product.collectionName,
+      description: `## ${product.name}\n\nA fictional ${product.style} watch from ${product.brand.name}: a ${product.caseSizeMm} mm case, ${product.movement} movement and a ${product.dialColor.toLowerCase()} dial. Sold as ${product.condition === "new" ? "new stock" : product.condition.replace("_", " ")}.\n\nThis fictional product demonstrates the catalog, grouped features and option selector. Watch artwork is an original generated placeholder, not a photograph of a commercial product.`,
+      gender: product.gender, condition: product.condition, movement: product.movement,
+      style: product.style, caseSizeMm: product.caseSizeMm, caseMaterial: product.caseMaterial,
+      strapType: product.strapType, glass: product.glass, waterResistanceM: product.waterResistanceM,
+      dialColor: product.dialColor, referenceNo: product.referenceNo, warrantyMonths: product.warrantyMonths,
+      launchYear: now.getUTCFullYear() - index % 4, countryOfOrigin: product.countryOfOrigin,
+      groundShippingOnly: false, isFeatured: index % 3 === 0,
       meta: { demo: true }, ...dates(createdAt),
     }).onConflictDoNothing().returning();
     // A natural-key collision belongs to an existing catalog owner. Leave it intact.
     if (!inserted) continue;
-    for (const [sizeIndex, sizeMl] of product.sizes.entries()) {
-      const retailWhole = 1500 + index * 200 + sizeMl * 10;
+    for (const [optionIndex, optionLabel] of product.optionLabels.entries()) {
+      const retailWhole = 3500 + index * 250 + optionIndex * 400;
       const saleWhole = index % 4 === 0 ? retailWhole : Number(BigInt(retailWhole) * BigInt(60 + index % 4 * 5) / 100n);
       await tx.insert(productVariants).values({
-        productId: inserted.id, sku: `DEMO-${product.slug.toUpperCase()}-${sizeMl}`,
-        sizeMl, sizeLabel: product.packaging === "gift_set" ? `3 × ${sizeMl / 3} ml set` : `${sizeMl} ml`,
+        productId: inserted.id, sku: `DEMO-${product.slug.toUpperCase()}-${optionIndex + 1}`,
+        optionLabel,
         retailPrice: demoMoney(retailWhole), price: demoMoney(saleWhole), costPrice: demoMoney(Number(BigInt(saleWhole) * 55n / 100n)),
         stockQuantity: index === 38 ? 0 : index === 39 ? storeConfig.catalog.lowStockThreshold : 30 + storeConfig.catalog.lowStockThreshold + index % 8,
         lowStockOverride: index === 37 ? storeConfig.catalog.lowStockThreshold + 1 : null,
-        isDefault: sizeIndex === 0, ...dates(createdAt),
+        isDefault: optionIndex === 0, ...dates(createdAt),
       });
     }
     await tx.insert(productImages).values([
-      { productId: inserted.id, url: product.imageUrl, alt: `${product.brand.name} ${product.name} illustrated demo bottle`, sortOrder: 0, ...dates(createdAt) },
-      { productId: inserted.id, url: product.hoverImageUrl, alt: `${product.name} ${product.concentration.toUpperCase()} illustrated bottle detail`, sortOrder: 1, ...dates(createdAt) },
+      { productId: inserted.id, url: product.imageUrl, alt: `${product.brand.name} ${product.name} illustrated demo watch`, sortOrder: 0, ...dates(createdAt) },
+      { productId: inserted.id, url: product.hoverImageUrl, alt: `${product.name} illustrated watch detail`, sortOrder: 1, ...dates(createdAt) },
     ]);
-    // Rotate over all sixty notes; each product has two notes at every position.
-    for (const [positionIndex, position] of (["top", "heart", "base"] as const).entries()) {
-      await tx.insert(productNotes).values([0, 1].map((offset) => ({
-        productId: inserted.id, noteId: noteIds.get(demoNotes[(index * 3 + positionIndex * 17 + offset) % demoNotes.length].slug)!,
-        position, ...dates(createdAt),
-      })));
-    }
+    // One feature from each group, so every product is reachable from every filter panel.
+    await tx.insert(productFeatures).values(product.featureSlugs.map((slug) => ({
+      productId: inserted.id, featureId: featureIds.get(slug)!, ...dates(createdAt),
+    })));
   }
 }
 
 async function seedMerchandising(tx: DbTransaction, now: Date) {
   await tx.insert(collections).values([
-    { name: "Men", slug: "men", description: "Fresh citrus, dry woods and aromatic discoveries.", filterJson: { gender: ["men"] }, sortOrder: 0, heroImageUrl: "/seed/men.svg" },
-    { name: "Women", slug: "women", description: "Explore florals, soft musks and warm amber.", filterJson: { gender: ["women"] }, sortOrder: 1, heroImageUrl: "/seed/women.svg" },
-    { name: "Niche", slug: "niche", description: "Unusual compositions from our fictional independent houses.", filterJson: { brandType: ["niche"] }, sortOrder: 2, heroImageUrl: "/seed/niche.svg" },
-    { name: "Deals", slug: "deals", description: "Browse fragrances priced below their demo retail price.", filterJson: { deal: true, sort: "discount" }, sortOrder: 3, heroImageUrl: "/seed/deals.svg" },
+    { name: "Men", slug: "men", description: "Field, diver and everyday watches sized for larger wrists.", filterJson: { gender: ["men"] }, sortOrder: 0, heroImageUrl: "/seed/men.svg" },
+    { name: "Women", slug: "women", description: "Slim cases, dress dials and bracelets from our invented houses.", filterJson: { gender: ["women"] }, sortOrder: 1, heroImageUrl: "/seed/women.svg" },
+    { name: "Automatic", slug: "automatic", description: "Self-winding movements with sweeping seconds.", filterJson: { movement: ["automatic"] }, sortOrder: 2, heroImageUrl: "/seed/automatic.svg" },
+    { name: "Deals", slug: "deals", description: "Browse watches priced below their demo retail price.", filterJson: { deal: true, sort: "discount" }, sortOrder: 3, heroImageUrl: "/seed/deals.svg" },
   ]).onConflictDoNothing();
-  const [niche] = await tx.select().from(collections).where(eq(collections.slug, "niche"));
+  const [automatic] = await tx.select().from(collections).where(eq(collections.slug, "automatic"));
   const freeDelivery = storeConfig.checkout.freeDeliveryOver;
   const deliveryCopy = freeDelivery === null
     ? storeConfig.checkout.deliveryZones.map((zone) => `${zone.label}: ${formatMoney(zone.fee)}`).join(" · ")
     : `Free delivery on orders of ${formatMoney(freeDelivery)} or more`;
   const bannerRows: typeof banners.$inferInsert[] = [
-    { placement: "announcement", title: "Discover the fictional fragrance edit", href: "/products", sortOrder: 0 },
+    { placement: "announcement", title: "Every watch in this catalog is fictional", href: "/products", sortOrder: 0 },
     { placement: "announcement", title: deliveryCopy, href: "/pages/delivery-returns", sortOrder: 1 },
-    { placement: "hero", title: "Find your next fragrance", subtitle: "Explore fresh arrivals from our imagined fragrance houses.", imageUrl: "/editorial/fragrance-still-life.webp", href: "/products?sort=newest", ctaLabel: "Explore new arrivals", sortOrder: 0 },
-    { placement: "hero", title: "Small bottles, rich notes", subtitle: "Discover perfume oils and attars.", imageUrl: "/seed/hero-oils.svg", href: "/products?concentration=oil&concentration=attar", ctaLabel: "Discover oils", sortOrder: 1 },
-    { placement: "event_card", title: "Gift sets", subtitle: "Boxed and ready to give", imageUrl: "/seed/brand-sahmira-scents-hero.svg", href: "/products?packaging=gift_set", ctaLabel: "Shop gift sets", sortOrder: 0 },
-    { placement: "event_card", title: "Minis & samples", subtitle: "Try a scent before the full bottle", imageUrl: "/seed/brand-elowen-stage-hero.svg", href: "/products?packaging=mini&packaging=sample", ctaLabel: "Shop small sizes", sortOrder: 1 },
+    { placement: "hero", title: "Timepieces worth wearing", subtitle: "Quartz, automatic and smart watches from our invented houses.", imageUrl: "/editorial/watch-still-life.webp", href: "/products?sort=newest", ctaLabel: "Explore new arrivals", sortOrder: 0 },
+    { placement: "hero", title: "Built for every wrist", subtitle: "Case sizes from 34 to 46 mm, with the movement and strap you prefer.", imageUrl: "/seed/hero-field.svg", href: "/products?size=36-40", ctaLabel: "Shop 36–40 mm", sortOrder: 1 },
+    { placement: "event_card", title: "Automatic picks", subtitle: "Self-winding movements with sweeping seconds", imageUrl: "/seed/brand-avenmere-atelier-hero.svg", href: "/products?movement=automatic", ctaLabel: "Shop automatic", sortOrder: 0 },
+    { placement: "event_card", title: "Dress watches", subtitle: "Slim cases and leather straps", imageUrl: "/seed/brand-elowen-stage-hero.svg", href: "/products?style=dress", ctaLabel: "Shop dress watches", sortOrder: 1 },
     { placement: "promo_strip", title: "A conversation before every delivery", subtitle: storeConfig.checkout.confirmationNote, href: "/pages/delivery-returns", ctaLabel: "How ordering works", sortOrder: 0 },
   ];
   await tx.insert(banners).values(bannerRows.map((banner) => ({ ...banner, startsAt: ago(now, 24) })));
@@ -122,22 +121,22 @@ async function seedMerchandising(tx: DbTransaction, now: Date) {
     { type: "value_props", title: "Why shop with us", config: { items: [
       { icon: "phone", title: "Confirmed by phone", description: "We call to confirm every order before it ships." },
       { icon: "truck", title: "Clear delivery fees", description: deliveryCopy },
-      { icon: "shield-check", title: "Know what you buy", description: "Notes, concentration and size on every page." },
+      { icon: "shield-check", title: "Know what you buy", description: "Movement, case size, condition and options on every page." },
       { icon: "message-circle", title: "Help choosing", description: `Call ${storeConfig.contact.phone} for advice.` },
     ] }, sortOrder: 1 },
-    { type: "category_tiles", title: "Shop by category", config: { tiles: ["men", "women", "niche", "deals"].map((slug, index) => ({ title: ["Men", "Women", "Niche", "Deals"][index], href: `/c/${slug}`, imageUrl: `/seed/${slug}.svg` })) }, sortOrder: 2 },
+    { type: "category_tiles", title: "Shop by category", config: { tiles: ["men", "women", "automatic", "deals"].map((slug, index) => ({ title: ["Men", "Women", "Automatic", "Deals"][index], href: `/c/${slug}`, imageUrl: `/seed/${slug}.svg` })) }, sortOrder: 2 },
     { type: "product_carousel", title: "Today's deals", config: { source: "deals", limit: 8 }, sortOrder: 3 },
-    { type: "event_cards", title: "Gifts & discovery", config: {}, sortOrder: 4 },
-    { type: "brand_strip", title: "Fragrance houses", config: {}, sortOrder: 5 },
+    { type: "event_cards", title: "Movements & styles", config: {}, sortOrder: 4 },
+    { type: "brand_strip", title: "Watch houses", config: {}, sortOrder: 5 },
     { type: "product_carousel", title: "Trending now", config: { source: "featured", limit: 8 }, sortOrder: 6 },
-    { type: "collection_banner", title: "A different direction", subtitle: "Discover our imagined niche houses.", config: { collectionId: niche.id, imageUrl: "/seed/niche.svg", href: "/c/niche", ctaLabel: "Explore niche" }, sortOrder: 7 },
+    { type: "collection_banner", title: "Mechanical, not battery", subtitle: "Discover our imagined automatic models.", config: { collectionId: automatic.id, imageUrl: "/seed/automatic.svg", href: "/c/automatic", ctaLabel: "Explore automatic" }, sortOrder: 7 },
     { type: "product_carousel", title: "New arrivals", config: { source: "new", limit: 8 }, sortOrder: 8 },
   ]);
   const zones = storeConfig.checkout.deliveryZones.map((zone) => `- ${zone.label}: ${formatMoney(zone.fee)}; estimated ${zone.etaDays}.`).join("\n");
   await tx.insert(staticPages).values([
-    { slug: "about", title: "About us", body: `# About ${storeConfig.store.name}\n\n${storeConfig.store.tagline}\n\nThis is a demonstration perfume store. Every fragrance house and product in this catalog is fictional, and all bottle artwork is generated for the template.\n\nBrowse without creating an account. Our team confirms orders by phone.\n\nContact: ${storeConfig.contact.phone}${storeConfig.contact.email ? ` · ${storeConfig.contact.email}` : ""}.` },
-    { slug: "delivery-returns", title: "Delivery & returns", body: `# Delivery & returns\n\n${storeConfig.checkout.confirmationNote}\n\n## Delivery zones\n\n${zones}\n\n${deliveryCopy}. Delivery estimates begin after confirmation.\n\n## Returns\n\nContact ${storeConfig.contact.phone} with your order number to discuss a delivery issue. This demo content must be replaced with the retailer's own return policy before accepting real orders.` },
-    { slug: "authenticity", title: "Authenticity", body: "# Know what you are buying\n\nOur product pages show the brand, concentration, size, packaging and notes. Tester, sample, mini and gift-set packaging is labeled explicitly.\n\nThis template uses fictional merchandise and original placeholder artwork. A retailer must replace this page with its own sourcing and authenticity information before launch." },
+    { slug: "about", title: "About us", body: `# About ${storeConfig.store.name}\n\n${storeConfig.store.tagline}\n\nThis is a demonstration watch store. Every house, model and price in this catalog is fictional, and all watch artwork is generated for the template.\n\nBrowse without creating an account. Our team confirms orders by phone.\n\nContact: ${storeConfig.contact.phone}${storeConfig.contact.email ? ` · ${storeConfig.contact.email}` : ""}.` },
+    { slug: "delivery-returns", title: "Delivery & returns", body: `# Delivery & returns\n\n${storeConfig.checkout.confirmationNote}\n\n## Delivery zones\n\n${zones}\n\n${deliveryCopy}. Delivery estimates begin after confirmation.\n\n## Returns\n\nContact ${storeConfig.contact.phone} with your order number within the return window. Watches must come back unworn, with the box, papers and all links included. This demo content must be replaced with the retailer's own return policy before accepting real orders.` },
+    { slug: "authenticity", title: "Authenticity", body: "# Know what you are buying\n\nOur product pages show the brand type, movement, case size, case material, strap, glass, water resistance, condition, warranty and grouped features. Box and papers are listed as features when they are included, and used or open-box stock is labelled explicitly.\n\n## Brand types\n\n- **Imported** — supplied through an import channel.\n- **Master copy** and **first copy** — copy-tier watches, labelled as such on every page.\n- **Local** — assembled or finished locally.\n\n## Warranty and box and papers\n\nEach listing states its warranty period in months. A watch sold with its box and papers says so in the features list; do not assume packaging on models that do not mention it.\n\nThis template uses fictional merchandise and original placeholder artwork. A retailer must replace this page with its own sourcing and authenticity information before launch." },
     { slug: "privacy", title: "Privacy", body: `# Privacy\n\nThis demo checkout collects a name, phone number, delivery address and optional email to fulfill an order. Customers do not create login accounts.\n\nOrder tracking requires both the order number and phone number. Store staff use order notes and call history to manage delivery.\n\nContact ${storeConfig.contact.email ?? storeConfig.contact.phone} about information supplied to the store. Replace this illustrative page with the retailer's applicable privacy policy before launch.` },
   ]).onConflictDoNothing();
 }
@@ -185,7 +184,7 @@ async function seedOrders(tx: DbTransaction, now: Date, adminId: string) {
       const [image] = await tx.select().from(productImages).where(and(eq(productImages.productId, item.product.id), eq(productImages.sortOrder, 0)));
       const quantity = offset === 0 && index % 5 === 0 ? 2 : 1;
       itemRows.push({ orderId, variantId: item.variant.id, productName: item.product.name, brandName: item.brand.name,
-        variantLabel: item.variant.sizeLabel ?? `${item.variant.sizeMl} ml`, imageUrl: image?.url,
+        variantLabel: item.variant.optionLabel ?? "Standard", imageUrl: image?.url,
         unitPrice: item.variant.price, quantity, lineTotal: item.variant.price * quantity, ...dates(createdAt) });
     }
     const subtotal = itemRows.reduce((sum, item) => sum + item.lineTotal, 0);
@@ -203,7 +202,7 @@ async function seedOrders(tx: DbTransaction, now: Date, adminId: string) {
     await tx.insert(orderEvents).values([
       { orderId, type: "status_change", toStatus: "pending", actor: "system", message: "Order placed; awaiting phone confirmation.", ...dates(createdAt) },
       { orderId, type: "system", actor: "system", message: "Demo order received through the web checkout fixture. No notification was sent.", ...dates(at(0.01)) },
-      { orderId, type: "note", actor: adminId, message: "Delivery address reviewed. Keep bottles upright and protect the parcel.", ...dates(at(0.15)) },
+      { orderId, type: "note", actor: adminId, message: "Delivery address reviewed. Pack the watch box flat and protect the clasp.", ...dates(at(0.15)) },
       { orderId, type: "call_logged", actor: adminId, message: status === "pending" ? "No answer on first call; follow up later." : index === 12 ? "Customer declined during the confirmation call." : "Spoke with customer; items and delivery address confirmed.", ...dates(at(0.5)) },
     ]);
     for (const [step, to] of path.entries()) {
@@ -235,7 +234,7 @@ async function seedOptionalFeatures(tx: DbTransaction, now: Date) {
       .where(eq(orders.status, "delivered")).limit(1);
     if (delivered) {
       await tx.insert(reviews).values([
-        { ...delivered, rating: 5, title: "A thoughtful everyday scent", body: "Fictional demo review: the opening is bright and the drydown feels soft. The package arrived safely.", status: "approved", verifiedPurchase: true },
+        { ...delivered, rating: 5, title: "A thoughtful everyday watch", body: "Fictional demo review: the case wears comfortably and the bracelet was easy to size. The package arrived safely.", status: "approved", verifiedPurchase: true },
         { productId: delivered.productId, customerName: "Demo Reviewer", rating: 4, title: "Soft and easy to wear", body: "Fictional demo review awaiting moderation.", status: "pending", verifiedPurchase: false },
         { productId: delivered.productId, customerName: "Demo Review Example", rating: 2, body: "Fictional off-topic review illustrating the rejected moderation state.", status: "rejected", verifiedPurchase: false },
       ]);
@@ -264,18 +263,18 @@ async function seedOptionalFeatures(tx: DbTransaction, now: Date) {
     const spreadProduct = v1?.productId ?? first?.productId;
     if (spreadProduct) {
       rows.push(
-        { productId: spreadProduct, customerName: "Demo Shopper Nadia", rating: 5, title: "My signature now", body: body("lasts through a full office day and gets compliments by lunch."), status: "approved", ...dates(ago(now, 20 * 24)) },
-        { productId: spreadProduct, customerName: "Demo Shopper Arif", rating: 4, title: "Great, a little sweet", body: body("the opening is lovely. The drydown leans sweeter than I expected."), status: "approved", ...dates(ago(now, 14 * 24)) },
-        { productId: spreadProduct, customerName: "Demo Shopper Tania", rating: 4, body: body("good projection for the first two hours, then stays close to the skin."), status: "approved", ...dates(ago(now, 9 * 24)) },
-        { productId: spreadProduct, customerName: "Demo Shopper Rafi", rating: 3, title: "Nice but not for summer", body: body("pleasant, but too heavy for hot afternoons. Better in the evening."), status: "approved", ...dates(ago(now, 4 * 24)) },
+        { productId: spreadProduct, customerName: "Demo Shopper Nadia", rating: 5, title: "My daily watch now", body: body("keeps good time and still looks sharp after a month of daily wear."), status: "approved", ...dates(ago(now, 20 * 24)) },
+        { productId: spreadProduct, customerName: "Demo Shopper Arif", rating: 4, title: "Great, a little heavy", body: body("the case is lovely, though it wears heavier than I expected on a small wrist."), status: "approved", ...dates(ago(now, 14 * 24)) },
+        { productId: spreadProduct, customerName: "Demo Shopper Tania", rating: 4, body: body("the bracelet rattles a little, but the timekeeping has been spot on."), status: "approved", ...dates(ago(now, 9 * 24)) },
+        { productId: spreadProduct, customerName: "Demo Shopper Rafi", rating: 3, title: "Nice but not for sport", body: body("handsome, but I would not take it swimming. Better for the office."), status: "approved", ...dates(ago(now, 4 * 24)) },
       );
     }
     // Verified purchases: the delivered customers review what they bought.
     for (const [i, row] of [first, ...others].filter(Boolean).entries()) {
       if (row.productId === spreadProduct) continue;
-      rows.push({ productId: row.productId, customerName: row.customerName, customerPhone: row.customerPhone, rating: i % 2 ? 4 : 5, title: i % 2 ? "Well packed, smells as described" : "Exactly as expected", body: body("delivery was quick and the bottle arrived sealed."), status: "approved", verifiedPurchase: true, ...dates(ago(now, 3 * 24 + i)) });
+      rows.push({ productId: row.productId, customerName: row.customerName, customerPhone: row.customerPhone, rating: i % 2 ? 4 : 5, title: i % 2 ? "Well packed, as described" : "Exactly as expected", body: body("delivery was quick and the watch arrived in its box, running."), status: "approved", verifiedPurchase: true, ...dates(ago(now, 3 * 24 + i)) });
     }
-    rows.push({ productId: spreadProduct ?? first.productId, customerName: "Demo Visitor", rating: 1, title: "Arrived late", body: body("waiting for moderation. Illustrates a low rating in the queue."), status: "pending", ...dates(ago(now, 5)) });
+    rows.push({ productId: spreadProduct ?? first.productId, customerName: "Demo Visitor", rating: 1, title: "Strap was wrong size", body: body("waiting for moderation. Illustrates a low rating in the queue."), status: "pending", ...dates(ago(now, 5)) });
     if (rows.length) await tx.insert(reviews).values(rows);
     await markSeeded(tx, `${demoSeedKey}_reviews_v2`, now);
   }
@@ -313,7 +312,7 @@ async function main() {
     await seedOptionalFeatures(tx, now);
     return alreadySeeded;
   });
-  console.log(result ? "Demo seed already applied; catalog edits, stock, orders, timelines, and admin credentials preserved." : "Seeded 10 fictional brands, 60 notes, 40 products, 80 variants, 80 images, 4 collections, 7 banners, 9 homepage sections, 4 pages, 10 customers, and 15 orders.");
+  console.log(result ? "Demo seed already applied; catalog edits, stock, orders, timelines, and admin credentials preserved." : "Seeded 10 fictional watch houses, 48 features, 40 models, 80 options, 80 images, 4 collections, 7 banners, 9 homepage sections, 4 pages, 10 customers, and 15 orders.");
   console.log(`Optional fixtures: coupons ${storeConfig.features.coupons ? "enabled (3)" : "disabled"}; reviews ${storeConfig.features.reviews ? "enabled" : "disabled"}. Admin account checked without resetting existing credentials.`);
 }
 

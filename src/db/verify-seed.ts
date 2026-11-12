@@ -11,11 +11,11 @@ import { env } from "@/lib/env";
 import { canTransition } from "@/lib/orders/transitions";
 import { storeConfig } from "../../store.config";
 import { demoProducts } from "./seed-data";
-import { account, banners, brands, collections, coupons, customers, homepageSections, notes, orderEvents, orderItems, orders, productImages, productNotes, products, productVariants, reviews, session, settings, staticPages, user, verification, type OrderStatus } from "./schema";
+import { account, banners, brands, collections, coupons, customers, features, homepageSections, orderEvents, orderItems, orders, productFeatures, productImages, products, productVariants, reviews, session, settings, staticPages, user, verification, type OrderStatus } from "./schema";
 
 async function main() {
   // Include auth rows and runtime markers in the fingerprint, not just table counts.
-  const tables = { brands, collections, notes, products, productNotes, productVariants, productImages, customers, orders, orderItems, orderEvents, banners, homepageSections, staticPages, settings, coupons, reviews, user, session, account, verification };
+  const tables = { brands, collections, features, products, productFeatures, productVariants, productImages, customers, orders, orderItems, orderEvents, banners, homepageSections, staticPages, settings, coupons, reviews, user, session, account, verification };
   const snapshot: Record<string, unknown> = {};
   for (const [name, table] of Object.entries(tables)) {
     // Keep disabled optional features completely out of query execution.
@@ -31,11 +31,11 @@ async function main() {
   }
 
   const brandRows = await db.select().from(brands);
-  const noteRows = await db.select().from(notes);
+  const featureRows = await db.select().from(features);
   const productRows = await db.select().from(products);
   const variantRows = await db.select().from(productVariants);
   const imageRows = await db.select().from(productImages);
-  const productNoteRows = await db.select().from(productNotes);
+  const productFeatureRows = await db.select().from(productFeatures);
   const collectionRows = await db.select().from(collections);
   const bannerRows = await db.select().from(banners);
   const sectionRows = await db.select().from(homepageSections);
@@ -45,25 +45,31 @@ async function main() {
   const eventRows = await db.select().from(orderEvents);
   const userRows = await db.select().from(user);
   const accountRows = await db.select().from(account);
-  const counts = { brands: brandRows.length, notes: noteRows.length, products: productRows.length, variants: variantRows.length, images: imageRows.length, productNotes: productNoteRows.length, collections: collectionRows.length, banners: bannerRows.length, homepageSections: sectionRows.length, pages: pageRows.length, orders: orderRows.length, orderItems: itemRows.length, orderEvents: eventRows.length };
-  assert.deepEqual(counts, { brands: 10, notes: 60, products: 40, variants: 80, images: 80, productNotes: 240, collections: 4, banners: 7, homepageSections: 9, pages: 4, orders: 15, orderItems: 30, orderEvents: 87 });
-  assert.equal(new Set(brandRows.map((row) => row.brandType)).size, 5);
-  assert.equal(new Set(noteRows.map((row) => row.group)).size, 10);
+  const counts = { brands: brandRows.length, features: featureRows.length, products: productRows.length, variants: variantRows.length, images: imageRows.length, productFeatures: productFeatureRows.length, collections: collectionRows.length, banners: bannerRows.length, homepageSections: sectionRows.length, pages: pageRows.length, orders: orderRows.length, orderItems: itemRows.length, orderEvents: eventRows.length };
+  assert.deepEqual(counts, { brands: 10, features: 48, products: 40, variants: 80, images: 80, productFeatures: 240, collections: 4, banners: 7, homepageSections: 9, pages: 4, orders: 15, orderItems: 30, orderEvents: 87 });
+  assert.equal(new Set(brandRows.map((row) => row.brandType)).size, 4);
+  assert.equal(new Set(featureRows.map((row) => row.group)).size, 6);
   assert.equal(new Set(productRows.map((row) => row.gender)).size, 3);
-  assert.equal(new Set(productRows.map((row) => row.concentration)).size, 7);
-  assert.equal(new Set(productRows.map((row) => row.packaging)).size, 5);
+  assert.equal(new Set(productRows.map((row) => row.movement)).size, 6);
+  assert.equal(new Set(productRows.map((row) => row.condition)).size, 4);
+  assert.equal(new Set(productRows.map((row) => row.caseSizeMm)).size, 7);
   assert.equal(new Set(bannerRows.map((row) => row.placement)).size, 4);
   assert.equal(new Set(sectionRows.map((row) => row.type)).size, 7);
-  assert.deepEqual(collectionRows.map((row) => row.slug).sort(), ["deals", "men", "niche", "women"]);
+  assert.deepEqual(collectionRows.map((row) => row.slug).sort(), ["automatic", "deals", "men", "women"]);
   assert.deepEqual(pageRows.map((row) => row.slug).sort(), ["about", "authenticity", "delivery-returns", "privacy"]);
 
   const imageUrls = new Set<string>();
   for (const product of productRows) {
     const variants = variantRows.filter((row) => row.productId === product.id);
-    assert.equal(variants.length, 2, `${product.slug} needs both size variants`);
+    assert.equal(variants.length, 2, `${product.slug} needs both option variants`);
+    assert(variants.every((row) => row.optionLabel), `${product.slug} options need labels`);
     assert.equal(variants.filter((row) => row.isDefault).length, 1);
     assert.deepEqual(imageRows.filter((row) => row.productId === product.id).map((row) => row.sortOrder).sort(), [0, 1]);
-    assert.equal(new Set(productNoteRows.filter((row) => row.productId === product.id).map((row) => row.position)).size, 3);
+    const links = productFeatureRows.filter((row) => row.productId === product.id);
+    const linked = links.map((row) => featureRows.find((feature) => feature.id === row.featureId)!);
+    assert.equal(linked.length, 6, `${product.slug} needs six features`);
+    assert.equal(new Set(linked.map((row) => row.group)).size, 6, `${product.slug} needs one feature per group`);
+    assert(product.caseSizeMm && product.waterResistanceM !== null);
   }
   for (const row of imageRows) { assert(row.alt.trim()); imageUrls.add(row.url); }
   for (const row of [...brandRows, ...collectionRows]) if (row.heroImageUrl) imageUrls.add(row.heroImageUrl);
@@ -71,7 +77,7 @@ async function main() {
   for (const row of bannerRows) if (row.imageUrl) imageUrls.add(row.imageUrl);
   for (const url of imageUrls) {
     // Only bundled, fictional artwork: generated SVG fixtures or the generated editorial photos.
-    assert((url.startsWith("/seed/") && url.endsWith(".svg")) || url.startsWith("/editorial/"), url);
+    assert((url.startsWith("/seed/") && url.endsWith(".svg")) || url === "/editorial/watch-still-life.webp", url);
     await access(join(process.cwd(), "public", url));
   }
 
