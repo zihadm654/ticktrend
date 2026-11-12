@@ -14,7 +14,7 @@ import { mkdirSync } from "node:fs";
 const { chromium } = createRequire(import.meta.url)("playwright-core");
 
 const BASE = process.env.BASE ?? "http://localhost:3100";
-const OUT = process.env.OUT ?? "/tmp/attar-verify-demo";
+const OUT = process.env.OUT ?? "/tmp/ttf-verify-demo";
 const PRODUCT = { id: process.env.PRODUCT_ID, slug: process.env.PRODUCT_SLUG };
 mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({

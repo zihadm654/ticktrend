@@ -49,9 +49,9 @@ function buildConnection(): Connection {
   return { db: shared, publicDb: shared, close: () => client.close() };
 }
 
-const globalForDb = globalThis as unknown as { __attarConnection?: Connection };
+const globalForDb = globalThis as unknown as { __ttfConnection?: Connection };
 function getConnection() {
-  return (globalForDb.__attarConnection ??= buildConnection());
+  return (globalForDb.__ttfConnection ??= buildConnection());
 }
 const forward = (pick: (connection: Connection) => Db) =>
   new Proxy({} as Db, {
@@ -77,8 +77,8 @@ export const publicSql = () => {
 };
 /** Standalone scripts must flush PGlite and release Postgres connections before exiting. */
 export const closeDb = async () => {
-  if (globalForDb.__attarConnection) {
-    await globalForDb.__attarConnection.close();
-    globalForDb.__attarConnection = undefined;
+  if (globalForDb.__ttfConnection) {
+    await globalForDb.__ttfConnection.close();
+    globalForDb.__ttfConnection = undefined;
   }
 };

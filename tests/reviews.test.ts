@@ -37,7 +37,7 @@ let server: typeof import("../src/lib/reviews/server");
 const project = process.cwd();
 let temporary: string;
 before(async () => {
-  temporary = mkdtempSync(join(tmpdir(), "attar-reviews-"));
+  temporary = mkdtempSync(join(tmpdir(), "ttf-reviews-"));
   process.chdir(temporary);
   delete process.env.DATABASE_URL;
   Object.assign(process.env, { NODE_ENV: "test" });

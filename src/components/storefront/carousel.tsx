@@ -33,10 +33,10 @@ export function StoreCarousel({
     const update = () => api.reInit({ duration: reduced.matches || document.documentElement.dataset.input === "keyboard" ? 0 : 25 });
     update();
     reduced.addEventListener("change", update);
-    document.addEventListener("attar-input-change", update);
+    document.addEventListener("ttf-input-change", update);
     return () => {
       reduced.removeEventListener("change", update);
-      document.removeEventListener("attar-input-change", update);
+      document.removeEventListener("ttf-input-change", update);
     };
   }, [api]);
   return (

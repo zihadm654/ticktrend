@@ -33,7 +33,7 @@ export function Announcement({
   useEffect(() => {
     let dismissed = false;
     try {
-      dismissed = !!sessionStorage.getItem("attar-announcement-dismissed");
+      dismissed = !!sessionStorage.getItem("ttf-announcement-dismissed");
     } catch {}
     if (dismissed) {
       const timer = setTimeout(() => setHidden(true), 0);
@@ -69,7 +69,7 @@ export function Announcement({
         onClick={() => {
           setHidden(true);
           try {
-            sessionStorage.setItem("attar-announcement-dismissed", "1");
+            sessionStorage.setItem("ttf-announcement-dismissed", "1");
           } catch {}
         }}
       >

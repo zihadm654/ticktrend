@@ -14,14 +14,14 @@ import { storeConfig } from "../store.config";
  * Phase 7.3: per-request database routing, against a real Postgres (sandboxes
  * are schemas + per-connection search_path, which the embedded PGlite can't
  * do). Set TEST_POSTGRES_URL to any database this test may create databases
- * from, e.g. postgres://postgres:attar@localhost:55432/attar. CI runs it.
+ * from, e.g. postgres://postgres:ttf@localhost:55432/ttf. CI runs it.
  * Against Neon, also set TEST_POSTGRES_DIRECT_URL (the URL without -pooler).
  */
 const base = process.env.TEST_POSTGRES_URL;
 const skip = base ? false : "set TEST_POSTGRES_URL to run the sandbox isolation tests";
 const secret = "sandbox-test-secret-0123456789abcdef";
 const project = process.cwd();
-const name = `attar_sandbox_${randomBytes(4).toString("hex")}`;
+const name = `ttf_sandbox_${randomBytes(4).toString("hex")}`;
 let admin: postgres.Sql;
 let database: typeof import("../src/db");
 let router: typeof import("../src/db/sandbox-router");

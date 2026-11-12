@@ -126,7 +126,7 @@ let server: typeof import("../src/lib/coupons/server");
 const project = process.cwd();
 let temporary: string;
 before(async () => {
-  temporary = mkdtempSync(join(tmpdir(), "attar-coupons-"));
+  temporary = mkdtempSync(join(tmpdir(), "ttf-coupons-"));
   process.chdir(temporary);
   delete process.env.DATABASE_URL;
   Object.assign(process.env, { NODE_ENV: "test" });

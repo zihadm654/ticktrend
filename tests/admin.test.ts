@@ -17,7 +17,7 @@ let auth: ReturnType<typeof import("../src/lib/auth").getAuth>;
 let temporary: string;
 const project = process.cwd();
 before(async () => {
-  temporary = mkdtempSync(join(tmpdir(), "attar-admin-"));
+  temporary = mkdtempSync(join(tmpdir(), "ttf-admin-"));
   process.chdir(temporary);
   delete process.env.DATABASE_URL;
   Object.assign(process.env, { NODE_ENV: "test" });

@@ -6,7 +6,7 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
  * without that session and can't be moved to another one. Verifying it needs
  * no database round trip, which matters because it runs before every query.
  */
-export const SANDBOX_COOKIE = "attar_sandbox";
+export const SANDBOX_COOKIE = "ttf_sandbox";
 export const sandboxIdPattern = /^[a-z0-9]{16}$/;
 export const sandboxSchema = (id: string) => {
   if (!sandboxIdPattern.test(id)) throw new Error("Invalid sandbox id.");

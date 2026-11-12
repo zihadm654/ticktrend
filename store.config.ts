@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * ============================================================================
- * ATTAR — STORE CONFIGURATION
+ * TICKTRENDFIT — STORE CONFIGURATION
  * ============================================================================
  * This is the single source of truth for store branding and behavior.
  * Retailers (and AI agents) customize the store by editing THIS file.
@@ -28,7 +28,7 @@ export const storeConfigSchema = () => z.object({
     tagline: z.string(),
     /** Path to logo image in /public, or null to render the name as text. */
     logo: z.string().nullable(),
-    /** Prefix for human-friendly order numbers, e.g. "ATR" -> ATR-1042. */
+    /** Prefix for human-friendly order numbers, e.g. "TTF" -> TTF-1042. */
     orderNumberPrefix: z
       .string()
       .regex(/^[A-Z]{2,6}$/, "2-6 uppercase letters"),
@@ -155,10 +155,10 @@ export type StoreConfig = z.infer<ReturnType<typeof storeConfigSchema>>;
 
 const config: StoreConfig = {
   store: {
-    name: "Attar Demo Store",
-    tagline: "Authentic fragrances. Never pay retail.",
+    name: "TickTrendFit",
+    tagline: "Timepieces worth wearing.",
     logo: null,
-    orderNumberPrefix: "ATR",
+    orderNumberPrefix: "TTF",
   },
 
   contact: {
@@ -238,8 +238,8 @@ const config: StoreConfig = {
   },
 
   theme: {
-    primary: "#343E32",
-    deal: "#343E32",
+    primary: "#3B4653",
+    deal: "#B45309",
     radius: "sm",
   },
 
@@ -247,7 +247,7 @@ const config: StoreConfig = {
     enabled: true,
     messages: [
       {
-        text: "End of season sale: up to 40% off",
+        text: "New arrivals: fresh dials and straps",
         href: "/products?deal=true",
       },
       { text: "Free delivery on orders over ৳5,000", href: null },
@@ -255,9 +255,9 @@ const config: StoreConfig = {
   },
 
   seo: {
-    titleTemplate: "%s | Attar Demo Store",
+    titleTemplate: "%s | TickTrendFit",
     description:
-      "Shop authentic designer, niche and Arabian fragrances at the best prices in Bangladesh. Cash on delivery available nationwide.",
+      "Shop watches in Dhaka and across Bangladesh: quartz, automatic and smart, with cash on delivery. Every order is confirmed by phone.",
     ogImage: "/opengraph-image",
   },
 };

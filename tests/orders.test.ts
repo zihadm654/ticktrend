@@ -15,10 +15,10 @@ const project = process.cwd();
 let temporary: string;
 
 before(async () => {
-  temporary = mkdtempSync(join(tmpdir(), "attar-orders-test-"));
+  temporary = mkdtempSync(join(tmpdir(), "ttf-orders-test-"));
   process.chdir(temporary);
   // Never use the shop's database or .env. An explicit test URL must name a disposable DB.
-  if (process.env.ATTAR_TEST_DATABASE_URL) process.env.DATABASE_URL = process.env.ATTAR_TEST_DATABASE_URL;
+  if (process.env.TTF_TEST_DATABASE_URL) process.env.DATABASE_URL = process.env.TTF_TEST_DATABASE_URL;
   else delete process.env.DATABASE_URL;
   Object.assign(process.env, { NODE_ENV: "test" });
   database = await import("../src/db");

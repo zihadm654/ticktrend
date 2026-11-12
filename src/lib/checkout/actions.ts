@@ -31,7 +31,7 @@ export async function placeOrder(input: unknown) {
   try {
     const result = await createOrder(parsed.data);
     // An unguessable order ID grants this browser access to its confirmation.
-    (await cookies()).set("attar-order", result.order.id, {
+    (await cookies()).set("ttf-order", result.order.id, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

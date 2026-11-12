@@ -15,7 +15,7 @@ import { SANDBOX_COOKIE, signSandboxCookie } from "../src/lib/demo/cookie";
  */
 const base = process.env.TEST_POSTGRES_URL;
 const skip = base ? false : "set TEST_POSTGRES_URL to run the Postgres demo-off test";
-const name = `attar_demo_off_${randomBytes(4).toString("hex")}`;
+const name = `ttf_demo_off_${randomBytes(4).toString("hex")}`;
 const secret = "demo-off-test-secret-0123456789abcdef";
 let admin: postgres.Sql;
 let database: typeof import("../src/db");

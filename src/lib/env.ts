@@ -154,7 +154,7 @@ function getEnv() {
 
 /** Signs admin sessions and demo sandbox cookies. The fallback is for local development only. */
 export const authSecret = () =>
-  env.BETTER_AUTH_SECRET ?? "attar-local-development-secret-change-before-deploying";
+  env.BETTER_AUTH_SECRET ?? "ttf-local-development-secret-change-before-deploying";
 
 /** Validate on first use, so a build can compile dynamic routes without production credentials. */
 export const env = new Proxy({} as z.infer<typeof envSchema>, {

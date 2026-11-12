@@ -11,8 +11,8 @@ import type { CartLine, CartQuote } from "@/lib/cart/schema";
 import { revalidateCart } from "@/lib/cart/actions";
 import { storeConfig } from "../../../store.config";
 import { isPhone } from "./device";
-const KEY = "attar-cart-v1";
-const COUPON_KEY = "attar-coupon-v1";
+const KEY = "ttf-cart-v1";
+const COUPON_KEY = "ttf-coupon-v1";
 const empty: CartQuote = {
   items: [],
   subtotal: 0,

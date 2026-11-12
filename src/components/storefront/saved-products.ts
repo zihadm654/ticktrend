@@ -5,8 +5,8 @@ import { loadSavedProducts } from "@/lib/catalog/actions";
 
 /** Browser-only lists of product IDs. Nothing is written to the server. */
 const lists = {
-  wishlist: { key: "attar-wishlist-v1", event: "attar-wishlist", max: 100 },
-  recent: { key: "attar-recent-v1", event: "attar-recent", max: 10 },
+  wishlist: { key: "ttf-wishlist-v1", event: "ttf-wishlist", max: 100 },
+  recent: { key: "ttf-recent-v1", event: "ttf-recent", max: 10 },
 } as const;
 export type SavedKind = keyof typeof lists;
 

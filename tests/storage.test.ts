@@ -6,7 +6,7 @@ Object.assign(process.env, {
   STORAGE_ADAPTER: "s3",
   S3_ENDPOINT: "https://account.r2.cloudflarestorage.com/",
   S3_REGION: "auto",
-  S3_BUCKET: "attar-uploads",
+  S3_BUCKET: "ttf-uploads",
   S3_ACCESS_KEY_ID: "fixture-key",
   S3_SECRET_ACCESS_KEY: "fixture-secret",
   S3_PUBLIC_URL: "https://pub-fixture.r2.dev/",
@@ -25,7 +25,7 @@ test("the s3 adapter signs path-style requests and returns public URLs", async (
     assert.equal(url, "https://pub-fixture.r2.dev/abc-123.webp");
     const put = seen[0];
     assert.equal(put.method, "PUT");
-    assert.equal(put.url, "https://account.r2.cloudflarestorage.com/attar-uploads/abc-123.webp");
+    assert.equal(put.url, "https://account.r2.cloudflarestorage.com/ttf-uploads/abc-123.webp");
     assert.match(put.headers.get("authorization") ?? "", /^AWS4-HMAC-SHA256 Credential=fixture-key\/\d{8}\/auto\/s3\/aws4_request/);
     assert.equal(put.headers.get("content-type"), "image/webp");
     assert.ok(put.headers.get("x-amz-content-sha256"));

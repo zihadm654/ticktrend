@@ -9,7 +9,7 @@ export function MotionPolicy() {
     const update = (mode: string) => {
       if (root.dataset.input === mode) return;
       root.dataset.input = mode;
-      document.dispatchEvent(new Event("attar-input-change"));
+      document.dispatchEvent(new Event("ttf-input-change"));
     };
     const keyboard = () => update("keyboard");
     const pointer = () => update("pointer");

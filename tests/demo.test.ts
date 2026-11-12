@@ -18,7 +18,7 @@ let session: typeof import("../src/lib/admin/session");
 let temporary: string;
 const project = process.cwd();
 before(async () => {
-  temporary = mkdtempSync(join(tmpdir(), "attar-demo-"));
+  temporary = mkdtempSync(join(tmpdir(), "ttf-demo-"));
   process.chdir(temporary);
   delete process.env.DATABASE_URL;
   delete process.env.DEMO_MODE;
@@ -80,7 +80,7 @@ test("with DEMO_MODE off, a valid sandbox cookie changes nothing and demo users 
   };
   const owner = await signIn("owner@example.com", "owner-password");
   const visitor = await signIn("demo-visitor@demo.invalid", "visitor-password");
-  const secret = "attar-local-development-secret-change-before-deploying";
+  const secret = "ttf-local-development-secret-change-before-deploying";
   const sandbox = signSandboxCookie(secret, "abcdefghijklmnop", new Date(Date.now() + 60_000), visitor);
   const headers = (token: string) =>
     new Headers({ cookie: `better-auth.session_token=${encodeURIComponent(token)}; ${SANDBOX_COOKIE}=${sandbox}` });
@@ -107,7 +107,7 @@ test("sandbox cookies are bound to the session, the secret and the expiry", () =
   assert.equal(verifySandboxCookie(secret, `${cookie}.x`, "session-1"), null);
   assert.equal(verifySandboxCookie(secret, "../../etc", "session-1"), null);
   assert.throws(() => signSandboxCookie(secret, "Robert'); drop", at, "s"));
-  assert.equal(readCookie("a=1; attar_sandbox=%E0%A4%A; b=2", "attar_sandbox"), undefined);
+  assert.equal(readCookie("a=1; ttf_sandbox=%E0%A4%A; b=2", "ttf_sandbox"), undefined);
 });
 
 test("with DEMO_MODE off, the demo actions refuse before touching anything", async () => {
