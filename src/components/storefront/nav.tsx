@@ -169,7 +169,7 @@ export function DesktopNavigation({
   );
 }
 
-/** Desktop "Brands" mega panel: hovering or focusing a brand swaps in its lead fragrance on the right. */
+/** Desktop "Brands" mega panel: hovering or focusing a brand swaps in its lead watch on the right. */
 export function BrandMenu({ brands }: { brands: BrandMenuItem[] }) {
   const withSpotlight = brands.filter((b) => b.spotlight);
   const initial = (withSpotlight.find((b) => b.isFeatured) ?? withSpotlight[0])?.id;
@@ -269,7 +269,7 @@ export function MobileMenu({
             <X size={18} />
           </SheetClose>
         </div>
-        <SheetDescription className="sr-only">Shop fragrances by collection or brand</SheetDescription>
+        <SheetDescription className="sr-only">Shop watches by collection or brand</SheetDescription>
         <nav
           aria-label="Mobile navigation"
           className="menu-sheet-nav"

@@ -54,7 +54,7 @@ async function HomeSection({ section: s }: { section: Section }) {
                     </Link>
                   )}
                   <Link className="button lg" href="/products">
-                    All fragrances
+                    All watches
                   </Link>
                 </div>
               </div>
@@ -62,7 +62,7 @@ async function HomeSection({ section: s }: { section: Section }) {
                 className="hero-media"
                 priority={index === 0}
                 src={b.imageUrl}
-                alt={b.title ?? "Fragrance collection"}
+                alt={b.title ?? "Watch collection"}
                 sizes="(max-width: 800px) 100vw, 55vw"
               />
             </div>
@@ -134,8 +134,8 @@ async function HomeSection({ section: s }: { section: Section }) {
             : "/products";
     return (
       <section className="section">
-        <SectionHead title={s.title ?? "Fragrances"} description={s.subtitle} href={href} />
-        <StoreCarousel label={s.title ?? "Fragrances"}>
+        <SectionHead title={s.title ?? "Watches"} description={s.subtitle} href={href} />
+        <StoreCarousel label={s.title ?? "Watches"}>
           {result.items.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
@@ -150,7 +150,7 @@ async function HomeSection({ section: s }: { section: Section }) {
     return (
       <section className="section">
         <SectionHead
-          title={s.title ?? "Fragrance houses"}
+          title={s.title ?? "Watch houses"}
           description={s.subtitle}
           href="/brands"
           linkLabel="All brands"
@@ -235,10 +235,10 @@ function FallbackHero() {
     <section className="hero">
       <div className="hero-slide">
         <div className="hero-copy">
-          <h1>Find your next fragrance</h1>
+          <h1>Find your next watch</h1>
           <div className="hero-actions">
             <Link href="/products" className="button primary lg">
-              Browse fragrances <ArrowRight size={18} aria-hidden />
+              Browse watches <ArrowRight size={18} aria-hidden />
             </Link>
           </div>
         </div>

@@ -94,7 +94,7 @@ export async function ProductReviews({
             <span className="icon-tile lg">
               <MessageSquareText size={22} aria-hidden />
             </span>
-            <p>Be the first to review this fragrance.</p>
+            <p>Be the first to review this watch.</p>
           </div>
         )}
       </div>

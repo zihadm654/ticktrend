@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { storeConfig } from "../../../store.config";
 import { contrastForeground } from "@/lib/theme";
 
-/** Store initials, e.g. "Attar Demo Store" → "AD". */
+/** Store initials, e.g. "TickTrendFit Demo Store" → "TD". */
 function initials(name: string) {
   const words = name.split(/\s+/).filter(Boolean);
   return (words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2)).toUpperCase();

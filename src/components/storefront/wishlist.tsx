@@ -80,7 +80,7 @@ export function WishlistPage() {
         <GridSkeleton count={count || 4} />
       ) : error && !items.length ? (
         <div className="empty-state" role="alert">
-          <h2>We couldn&apos;t load your saved fragrances</h2>
+          <h2>We couldn&apos;t load your saved watches</h2>
           <p>Check your connection and reload the page. Your list is still saved.</p>
         </div>
       ) : items.length ? (
@@ -95,9 +95,9 @@ export function WishlistPage() {
             <Heart size={22} aria-hidden />
           </span>
           <h2>Your wishlist is empty</h2>
-          <p>Tap the heart on any fragrance to save it here for later.</p>
+          <p>Tap the heart on any watch to save it here for later.</p>
           <Link href="/products" className="button primary">
-            Browse fragrances
+            Browse watches
           </Link>
         </div>
       )}
@@ -127,15 +127,15 @@ export function WishlistSheet() {
             <X size={20} />
           </SheetClose>
         </div>
-        <SheetDescription className="sr-only">Fragrances you saved on this device.</SheetDescription>
+        <SheetDescription className="sr-only">Watches you saved on this device.</SheetDescription>
         <div className="cart-sheet-body">
           {!ids.length ? (
             <div className="empty-cart">
               <Heart size={36} strokeWidth={1.25} aria-hidden />
               <h2>Nothing saved yet</h2>
-              <p className="muted">Tap the heart on any fragrance to keep it here.</p>
+              <p className="muted">Tap the heart on any watch to keep it here.</p>
               <Link href="/products" className="button primary" onClick={() => setOpen(false)}>
-                Browse fragrances
+                Browse watches
               </Link>
             </div>
           ) : loading && !items.length ? (

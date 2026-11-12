@@ -156,13 +156,13 @@ export function EmptyCart() {
     <div className="empty-cart">
       <ShoppingBag size={36} weight="light" />
       <h2>Your bag is empty</h2>
-      <p className="muted">Find a fragrance you want to wear.</p>
+      <p className="muted">Find a watch you want to wear.</p>
       <Link
         href="/products"
         className="button primary"
         onClick={() => cart.setOpen(false)}
       >
-        Browse fragrances
+        Browse watches
       </Link>
     </div>
   );

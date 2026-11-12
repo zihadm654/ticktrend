@@ -25,7 +25,7 @@ export default function OpenGraphImage() {
         {storeConfig.store.tagline}
       </div>
       <div style={{ marginTop: 80, fontSize: 24 }}>
-        Fragrances · Brands · Collections
+        Watches · Brands · Collections
       </div>
     </div>,
     size,

@@ -26,7 +26,7 @@ export function RecentlyViewed({ currentId }: { currentId?: string }) {
           Clear history
         </button>
       </div>
-      <StoreCarousel label="Recently viewed fragrances">
+      <StoreCarousel label="Recently viewed watches">
         {items.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}

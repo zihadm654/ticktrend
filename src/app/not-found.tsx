@@ -12,7 +12,7 @@ export default async function NotFound() {
       <h1>Page not found</h1>
       <p>This page may have moved or is no longer available.</p>
       <Link href="/products" className="button primary">
-        Browse fragrances
+        Browse watches
       </Link>
     </main>
   );

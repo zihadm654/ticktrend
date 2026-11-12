@@ -55,9 +55,9 @@ export const shopIcons = {
   deals: BadgePercent,
 };
 export const shop: ShopLink[] = [
-  { key: "all", name: "All fragrances", href: "/products", hint: "Everything in store" },
-  { key: "men", name: "Men", href: "/products?gender=men", hint: "Fragrances for him" },
-  { key: "women", name: "Women", href: "/products?gender=women", hint: "Fragrances for her" },
+  { key: "all", name: "All watches", href: "/products", hint: "Everything in store" },
+  { key: "men", name: "Men", href: "/products?gender=men", hint: "Watches for him" },
+  { key: "women", name: "Women", href: "/products?gender=women", hint: "Watches for her" },
   { key: "unisex", name: "Unisex", href: "/products?gender=unisex", hint: "Made for anyone" },
   { key: "new", name: "New arrivals", href: "/products?new=true", hint: "Just landed" },
   { key: "deals", name: "Deals", href: "/products?deal=true&sort=discount", hint: "Marked down now" },
@@ -282,7 +282,7 @@ export async function StoreFooter() {
           </div>
           <nav aria-label="Shop" className="footer-links">
             <p>Shop</p>
-            <Link href="/products">All fragrances</Link>
+            <Link href="/products">All watches</Link>
             <Link href="/brands">Brands</Link>
             <Link href="/products?new=true">New arrivals</Link>
             <Link href="/products?deal=true&sort=discount">Deals</Link>

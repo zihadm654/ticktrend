@@ -13,7 +13,7 @@ export { SearchForm };
 export function HeaderActions() {
   return (
     <div className="header-actions">
-      <Link className="icon-button mobile-only" href="/search" aria-label="Search fragrances">
+      <Link className="icon-button mobile-only" href="/search" aria-label="Search watches">
         <Search size={18} />
       </Link>
       {storeConfig.features.wishlist && <WishlistSheet />}
