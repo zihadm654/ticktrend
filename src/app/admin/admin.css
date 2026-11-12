@@ -2960,31 +2960,6 @@ a.admin-kpi:hover .admin-kpi-arrow {
 .admin-gallery-add small {
   color: var(--muted);
 }
-.admin-pyramid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-.admin-pyramid-tier {
-  display: grid;
-  gap: 14px;
-  align-content: start;
-  padding: 16px;
-  border-radius: var(--r-lg);
-  background: white;
-}
-.admin-pyramid-head {
-  display: grid;
-  gap: 2px;
-}
-.admin-pyramid-head strong {
-  font-weight: 550;
-}
-.admin-pyramid-head small {
-  color: var(--muted);
-}
-.admin-pyramid .admin-chip.on {
-  background: var(--panel);
   border-color: transparent;
 }
 .admin-media-preview {
@@ -3188,13 +3163,13 @@ a.admin-kpi:hover .admin-kpi-arrow {
 .admin-sort-moves {
   display: flex;
 }
-.admin-note-groups {
+.admin-feature-groups {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
   align-items: start;
 }
-.admin-note-group .admin-panel-head {
+.admin-feature-group .admin-panel-head {
   margin-bottom: 14px;
 }
 .admin-tiles {

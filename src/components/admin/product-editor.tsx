@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -713,7 +714,9 @@ export function ProductEditor({
                 </div>
               ) : (
                 <p className="admin-callout" data-tone="info">
-                  No features yet. Add them under Taxonomy, then attach them here.
+                  No features yet.{" "}
+                  <Link href="/admin/taxonomy">Add them under Taxonomy</Link>, then
+                  attach them here.
                 </p>
               )}
               <FieldError error={errors.featureIds} />

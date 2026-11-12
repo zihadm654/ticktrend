@@ -50,7 +50,7 @@ const fields: Record<Entity, Field[]> = {
     {
       key: "brandType",
       label: "Brand type",
-      options: ["designer", "niche", "arabian", "celebrity", "local"],
+      options: ["imported", "mastercopy", "firstcopy", "local"],
     },
     { key: "logoUrl", label: "Logo", kind: "image" },
     { key: "heroImageUrl", label: "Hero image", kind: "image" },
@@ -59,7 +59,6 @@ const fields: Record<Entity, Field[]> = {
     sort,
   ],
   features: [
-    ...nameFields,
     {
       key: "group",
       label: "Feature group",
@@ -71,7 +70,9 @@ const fields: Record<Entity, Field[]> = {
         "case",
         "strap",
       ],
+      hint: "Groups features on the product page and in filters.",
     },
+    ...nameFields,
   ],
   collections: [
     ...nameFields,

@@ -560,17 +560,18 @@ export default async function Section({
     </div>
   );
   if (entity === "features") {
-    const groups = [...new Set(rows.map((r) => String(r.group)))];
+    const order = s.featureGroup.enumValues;
+    const groups = order.filter((g) => rows.some((r) => r.group === g));
     return (
       <>
         {header}
         {tabs}
         {rows.length ? (
-          <div className="admin-note-groups">
+          <div className="admin-feature-groups">
             {groups.map((g) => {
               const inGroup = rows.filter((r) => r.group === g);
               return (
-                <Panel key={g} title={humanize(g)} description={`${inGroup.length} features`} className="admin-note-group">
+                <Panel key={g} title={humanize(g)} description={`${inGroup.length} features`} className="admin-feature-group">
                   <div className="admin-chips">
                     {inGroup.map((r) => (
                       <Link key={String(r.id)} href={href(String(r.id))} className="admin-chip link">
