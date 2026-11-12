@@ -71,7 +71,7 @@ export async function quoteCart(
       name: p.name,
       brand: row.brand,
       slug: p.slug,
-      label: v.sizeLabel ?? `${v.sizeMl} ml`,
+      label: v.optionLabel ?? "Standard",
       image: images.find((image) => image.productId === p.id)?.url ?? null,
       stock: v.stockQuantity,
     });

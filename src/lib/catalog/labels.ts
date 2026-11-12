@@ -72,3 +72,13 @@ export function label(value: string) {
 /** Minimum water-resistance facet values, in metres. */
 export const waterBuckets = [30, 50, 100, 200, 300] as const;
 export const waterLabel = (metres: number) => `${metres} m+`;
+
+/** Feature groups in product-page order. */
+export const featureGroups = [
+  "display",
+  "complications",
+  "durability",
+  "movement",
+  "case",
+  "strap",
+] as const;

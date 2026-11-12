@@ -80,7 +80,7 @@
   .button,
   .icon-button,
   .chip,
-  .size-options button {
+  .option-options button {
     -webkit-touch-callout: none;
     user-select: none;
   }
@@ -1043,7 +1043,7 @@
     font-size: 13px;
   }
   /* Sizes: a swipeable row of tiles. */
-  .size-options {
+  .option-options {
     display: flex;
     margin-inline: calc(var(--sf-gutter) * -1);
     padding: 2px var(--sf-gutter);
@@ -1051,7 +1051,7 @@
     scroll-snap-type: x proximity;
     scrollbar-width: none;
   }
-  .size-options button {
+  .option-options button {
     flex: 0 0 auto;
     min-width: 104px;
     scroll-snap-align: start;

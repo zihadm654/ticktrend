@@ -173,18 +173,18 @@ export function ProductBuyBox({
     return (
       <div className="buy-box">
         {heading}
-        <p className="callout">No sizes are currently available.</p>
+        <p className="callout">No options are currently available.</p>
         <Link href="/products" className="button">
-          Browse fragrances
+          Browse watches
         </Link>
       </div>
     );
   const low = v.stockQuantity <= (v.lowStockOverride ?? config.catalog.lowStockThreshold);
   const discount = calcDiscountPercent(v.retailPrice, v.price);
   const soldOut = v.stockQuantity === 0;
-  const size = v.sizeLabel ?? `${v.sizeMl} ml`;
+  const option = v.optionLabel || "Standard";
   const wa = config.contact.whatsapp
-    ? `https://wa.me/${config.contact.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`I'd like to ask about ${p.brand.name} ${p.name}, ${size}.`)}`
+    ? `https://wa.me/${config.contact.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`I'd like to ask about ${p.brand.name} ${p.name}, ${option}.`)}`
     : null;
   const add = () => {
     haptic(8);
@@ -195,9 +195,9 @@ export function ProductBuyBox({
     <div className="buy-box">
       {heading}
       <div className="buy-tags">
-        <span className="chip">{label(p.concentration)}</span>
-        <span className="chip">{label(p.gender)}</span>
-        {p.packaging !== "standard" && <span className="chip">{label(p.packaging)}</span>}
+        <span className="chip">{label(p.movement)}</span>
+        {p.style && <span className="chip">{label(p.style)}</span>}
+        <span className="chip">{label(p.condition)}</span>
       </div>
 
       <div className="buy-price">
@@ -211,11 +211,11 @@ export function ProductBuyBox({
       </p>
 
       {p.variants.length > 1 && (
-        <fieldset className="size-picker">
+        <fieldset className="option-picker">
           <legend>
-            Size <span>{size}</span>
+            Option <span>{option}</span>
           </legend>
-          <div className="size-options">
+          <div className="option-options">
             {p.variants.map((variant) => (
               <button
                 type="button"
@@ -227,7 +227,7 @@ export function ProductBuyBox({
                   setQuantity(1);
                 }}
               >
-                <strong>{variant.sizeLabel ?? `${variant.sizeMl} ml`}</strong>
+                <strong>{variant.optionLabel || "Standard"}</strong>
                 <span>{variant.stockQuantity === 0 ? "Sold out" : formatMoney(variant.price)}</span>
               </button>
             ))}
@@ -297,7 +297,7 @@ export function ProductBuyBox({
       </div>
 
       <div className="buy-help">
-        <p>Questions about this fragrance?</p>
+        <p>Questions about this watch?</p>
         <div>
           <a className="button sm" href={tel}>
             <Phone size={14} aria-hidden /> Call us
@@ -321,7 +321,7 @@ export function ProductBuyBox({
       <MobileBuyBar visible={barVisible}>
         <div>
           <strong>{formatMoney(v.price)}</strong>
-          <span>{size}</span>
+          <span>{option}</span>
         </div>
         <button disabled={disabled} className="button primary" onClick={add} tabIndex={barVisible ? 0 : -1}>
           {soldOut ? "Out of stock" : cart.busy ? "Adding…" : "Add to bag"}

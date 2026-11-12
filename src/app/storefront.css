@@ -274,7 +274,7 @@ p {
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-html:not([data-input="keyboard"]) :is(.button, .icon-button, a.chip, .chip.removable, .size-options button, .quantity-control button, .gallery-thumbnails button, .carousel-controls button):not(:disabled):not([data-static]):active {
+html:not([data-input="keyboard"]) :is(.button, .icon-button, a.chip, .chip.removable, .option-options button, .quantity-control button, .gallery-thumbnails button, .carousel-controls button):not(:disabled):not([data-static]):active {
   transform: scale(0.97);
 }
 /* Count badges pop when their number goes up (CountBadge sets data-bump). */
@@ -579,7 +579,29 @@ input.checkbox:checked {
   background-color: var(--sf-accent);
   background-size: 12px;
 }
-html:not([data-input="keyboard"]) :is(input.checkbox, input.switch):active {
+/* Single-value facets (water resistance) are choices, not toggles. */
+input.radio {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+  border: 1.5px solid var(--sf-line-strong);
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    transform 150ms var(--ease-out);
+}
+input.radio:checked {
+  border-color: var(--sf-accent);
+  background: var(--sf-accent);
+  box-shadow: inset 0 0 0 4px white;
+}
+html:not([data-input="keyboard"]) :is(input.checkbox, input.radio, input.switch):active {
   transform: scale(0.92);
 }
 
@@ -2788,29 +2810,29 @@ div.store-width.empty-state {
   background: var(--sf-bad-dot);
   box-shadow: none;
 }
-.size-picker {
+.option-picker {
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
-.size-picker legend {
+.option-picker legend {
   margin-bottom: 10px;
   padding: 0;
   color: var(--sf-ink);
   font-weight: 500;
 }
-.size-picker legend span {
+.option-picker legend span {
   margin-left: 6px;
   color: var(--sf-muted);
   font-weight: 400;
 }
-.size-options {
+.option-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 8px;
 }
-.size-options button {
+.option-options button {
   display: grid;
   gap: 2px;
   padding: 12px 14px;
@@ -2825,24 +2847,24 @@ div.store-width.empty-state {
     box-shadow 150ms ease,
     transform 150ms var(--ease-out);
 }
-.size-options button strong {
+.option-options button strong {
   font-weight: 500;
 }
-.size-options button span {
+.option-options button span {
   color: var(--sf-muted);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 @media (hover: hover) {
-  .size-options button:hover:not(:disabled) {
+  .option-options button:hover:not(:disabled) {
     border-color: var(--sf-line-strong);
   }
 }
-.size-options button[aria-pressed="true"] {
+.option-options button[aria-pressed="true"] {
   border-color: var(--sf-ink);
   box-shadow: inset 0 0 0 1px var(--sf-ink);
 }
-.size-options button:disabled {
+.option-options button:disabled {
   opacity: 0.5;
 }
 .purchase-row {
@@ -3007,26 +3029,26 @@ div.store-width.empty-state {
 .product-about .prose-copy {
   max-width: 72ch;
 }
-.pyramid {
+.feature-groups {
   display: grid;
   gap: 10px;
 }
-.pyramid-tier {
+.feature-group {
   display: grid;
   gap: 10px;
   padding: 14px 16px;
   border-radius: var(--sf-r-card);
   background: white;
 }
-.pyramid-tier p strong {
+.feature-group p strong {
   color: var(--sf-ink);
   font-weight: 500;
 }
-.pyramid-tier p span {
+.feature-group p span {
   color: var(--sf-muted);
   font-size: 13px;
 }
-.pyramid .chip {
+.feature-group .chip {
   background: var(--sf-panel);
   border-color: transparent;
 }
@@ -4060,7 +4082,7 @@ html[data-input="pointer"]:has(.store-header) {
   html:has(.store-header) {
     scroll-behavior: auto !important;
   }
-  :is(.button, .icon-button, a.chip, .chip.removable, .size-options button, .quantity-control button, .gallery-thumbnails button, .carousel-controls button, input.checkbox, input.switch, .quick-add) {
+  :is(.button, .icon-button, a.chip, .chip.removable, .option-options button, .quantity-control button, .gallery-thumbnails button, .carousel-controls button, input.checkbox, input.switch, .quick-add) {
     transform: none !important;
   }
   .store-sheet[data-slot="sheet-content"] {

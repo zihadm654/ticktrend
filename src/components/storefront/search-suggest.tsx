@@ -120,13 +120,13 @@ export function SearchForm({ className = "", autoFocus }: { className?: string; 
     >
       {loading && show ? <LoaderCircle size={17} className="spin" aria-hidden /> : <Search size={17} aria-hidden />}
       <label className="sr-only" htmlFor={inputId}>
-        Search fragrances
+        Search watches
       </label>
       <input
         id={inputId}
         name="q"
         type="search"
-        placeholder="Search fragrances, brands or notes"
+        placeholder="Search watches, brands or references"
         maxLength={160}
         autoFocus={autoFocus}
         autoComplete="off"
@@ -178,7 +178,7 @@ export function SearchForm({ className = "", autoFocus }: { className?: string; 
             {data.products.length > 0 && (
               <div role="group" aria-labelledby={`${listId}-products`}>
                 <p className="suggest-label" id={`${listId}-products`} role="presentation">
-                  Fragrances
+                  Watches
                 </p>
                 {data.products.map((p, i) => (
                   <Link key={p.slug} className="suggest-product" {...optionProps(options[i], i)}>

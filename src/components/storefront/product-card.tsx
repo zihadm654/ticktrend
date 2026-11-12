@@ -22,7 +22,7 @@ export function ProductCard({
   priority?: boolean;
 }) {
   const v = p.variant;
-  const size = v.sizeLabel ?? `${v.sizeMl} ml`;
+  const option = v.optionLabel || "Standard";
   const discount = calcDiscountPercent(v.retailPrice, v.price);
   const low =
     p.hasStock &&
@@ -52,7 +52,7 @@ export function ProductCard({
           </span>
         )}
         {storeConfig.features.wishlist && <WishlistButton id={p.id} name={p.name} />}
-        {v.stockQuantity > 0 && <QuickAdd variantId={v.id} price={v.price} name={p.name} size={size} />}
+        {v.stockQuantity > 0 && <QuickAdd variantId={v.id} price={v.price} name={p.name} option={option} />}
       </div>
       <div className="product-card-body">
         <p className="product-card-brand">{p.brand.name}</p>
@@ -62,9 +62,9 @@ export function ProductCard({
           </Link>
         </h3>
         <ul className="product-card-tags" aria-label="Details">
-          <li>{label(p.concentration)}</li>
-          <li>{size}</li>
-          {p.sizes > 1 && <li>{p.sizes} sizes</li>}
+          <li>{label(p.movement)}</li>
+          {p.caseSizeMm !== null && <li>{p.caseSizeMm} mm</li>}
+          {p.options > 1 && <li>{p.options} options</li>}
         </ul>
         {p.rating && p.rating.count > 0 && (
           <p className="product-card-rating">

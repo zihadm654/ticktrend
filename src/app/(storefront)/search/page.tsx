@@ -26,7 +26,7 @@ export default async function Search({
         <SearchForm className="page-search" />
       </div>
       <ProductListing
-        title={q ? `Results for "${q}"` : "Search fragrances"}
+        title={q ? `Results for "${q}"` : "Search watches"}
         path="/search"
         searchParams={raw}
       />

@@ -9,17 +9,24 @@ import { storeConfig } from "../../../store.config";
 import { SheetGrabber } from "./sheet-drag";
 
 type Facets = Record<string, { value: string; label: string; count: number; group?: string }[]>;
-/** Facet groups, in display order. Keys must match catalog URL params. */
+/** Facet groups, in watch-shopping order. Keys must match catalog URL params. */
 const names: Record<string, string> = {
-  gender: "For whom",
   brand: "Brand",
-  family: "Fragrance family",
-  note: "Notes",
-  concentration: "Concentration",
-  size: "Bottle size",
-  packaging: "Packaging",
   brandType: "Brand type",
+  gender: "For whom",
+  movement: "Movement",
+  size: "Case size",
+  material: "Case material",
+  strap: "Strap",
+  dial: "Dial colour",
+  glass: "Glass",
+  water: "Water resistance",
+  style: "Style",
+  condition: "Condition",
+  feature: "Features",
 };
+/** Water resistance is a minimum, so only one value applies at a time. */
+const singleValue = new Set(["water"]);
 const COLLAPSED_OPTIONS = 6;
 const filterKeys = [...Object.keys(names), "minPrice", "maxPrice", "inStock", "deal", "new"];
 const countSelected = (params: URLSearchParams) =>
@@ -42,8 +49,10 @@ function FilterForm({ facets, mobile, onApplied }: { facets: Facets; mobile: boo
     if (checked === undefined) {
       next.delete(key);
       if (value) next.set(key, value);
-    } else if (checked) next.append(key, value);
-    else next.delete(key, value);
+    } else if (checked) {
+      if (singleValue.has(key)) next.delete(key);
+      next.append(key, value);
+    } else next.delete(key, value);
     setDraft(next);
     setError("");
   }
@@ -144,7 +153,7 @@ function FilterForm({ facets, mobile, onApplied }: { facets: Facets; mobile: boo
               ? matches
               : matches.filter((o, index) => index < COLLAPSED_OPTIONS || selected.includes(o.value));
             return (
-              <details key={key} className="filter-group" open={["gender", "brand"].includes(key) || selected.length > 0}>
+              <details key={key} className="filter-group" open={["brand", "movement"].includes(key) || selected.length > 0}>
                 <summary>
                   {title}
                   {selected.length > 0 && <span className="count-pill">{selected.length}</span>}
@@ -165,8 +174,8 @@ function FilterForm({ facets, mobile, onApplied }: { facets: Facets; mobile: boo
                       )}
                       <label className="filter-option">
                         <input
-                          type="checkbox"
-                          className="checkbox"
+                          type={singleValue.has(key) ? "radio" : "checkbox"}
+                          className={singleValue.has(key) ? "radio" : "checkbox"}
                           name={key}
                           value={option.value}
                           checked={selected.includes(option.value)}

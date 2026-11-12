@@ -93,7 +93,7 @@ export async function ProductListing({
           <div className="listing-toolbar">
             <MobileFilters facets={facets} />
             <p className="listing-count">
-              <strong>{result.total}</strong> {result.total === 1 ? "fragrance" : "fragrances"}
+              <strong>{result.total}</strong> {result.total === 1 ? "watch" : "watches"}
             </p>
             <SortSelect value={searchParams.sort ? result.params.sort : ((scope.sort as string) ?? "newest")} />
             <div className="quick-filters">
@@ -138,8 +138,8 @@ export async function ProductListing({
               <span className="icon-tile lg">
                 <SearchX size={22} aria-hidden />
               </span>
-              <h2>No fragrances found</h2>
-              <p>Try removing a filter or searching for something else.</p>
+              <h2>No watches found</h2>
+              <p>Try removing a filter, or search for a different model or brand.</p>
               <Link href={clear} className="button">
                 Clear filters
               </Link>

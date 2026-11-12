@@ -10,7 +10,7 @@ export default async function Brands() {
       <Breadcrumbs items={[["Home", "/"], ["Brands"]]} />
       <header className="listing-header">
         <div>
-          <h1>Fragrance houses</h1>
+          <h1>Watch houses</h1>
           <p className="listing-description">
             {brands.length} {brands.length === 1 ? "house" : "houses"} in our catalog
           </p>

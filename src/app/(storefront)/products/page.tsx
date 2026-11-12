@@ -1,7 +1,7 @@
 import { ProductListing } from "@/components/storefront/product-listing";
 import { pageMetadata } from "@/lib/seo";
 import type { SearchParams } from "@/lib/catalog/params";
-export const metadata = pageMetadata("All fragrances", "/products");
+export const metadata = pageMetadata("All watches", "/products");
 export default async function Products({
   searchParams,
 }: {
@@ -9,7 +9,7 @@ export default async function Products({
 }) {
   return (
     <ProductListing
-      title="All fragrances"
+      title="All watches"
       path="/products"
       searchParams={await searchParams}
     />

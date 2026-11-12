@@ -8,13 +8,19 @@ import {
 } from "@/components/storefront/product-details";
 import { Markdown } from "@/components/storefront/markdown";
 import { ProductCard } from "@/components/storefront/product-card";
-import { label } from "@/lib/catalog/labels";
+import { label, featureGroups } from "@/lib/catalog/labels";
 import { Breadcrumbs, SectionHead } from "@/components/storefront/ui";
 import { ProductReviews } from "@/components/storefront/product-reviews";
 import { RecentlyViewed } from "@/components/storefront/recently-viewed";
 import { getRatingsFor } from "@/lib/reviews/server";
 import { pageMetadata, absoluteUrl, jsonLd } from "@/lib/seo";
 import { storeConfig } from "../../../../../store.config";
+const conditionUrl = (condition: string) =>
+  condition === "refurbished"
+    ? "https://schema.org/RefurbishedCondition"
+    : condition === "used" || condition === "open_box"
+      ? "https://schema.org/UsedCondition"
+      : "https://schema.org/NewCondition";
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -40,7 +46,7 @@ export default async function Product({ params, searchParams }: Props) {
       {
         limit: 8,
         excludeId: p.id,
-        related: { brandId: p.brandId, noteIds: p.notes.map((n) => n.noteId) },
+        related: { brandId: p.brandId, featureIds: p.features.map((f) => f.featureId) },
       },
     ),
     getRatingsFor([p.id]),
@@ -73,6 +79,7 @@ export default async function Product({ params, searchParams }: Props) {
     offers: p.variants.map((v) => ({
       "@type": "Offer",
       sku: v.sku,
+      name: v.optionLabel,
       url: absoluteUrl(`/products/${p.slug}`),
       priceCurrency: storeConfig.currency.code,
       price:
@@ -83,7 +90,7 @@ export default async function Product({ params, searchParams }: Props) {
         v.stockQuantity > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
+      itemCondition: conditionUrl(p.condition),
     })),
   };
   return (
@@ -110,7 +117,7 @@ export default async function Product({ params, searchParams }: Props) {
       <Breadcrumbs
         items={[
           ["Home", "/"],
-          ["Fragrances", "/products"],
+          ["Watches", "/products"],
           [p.brand.name, `/brands/${p.brand.slug}`],
           [p.name],
         ]}
@@ -121,30 +128,24 @@ export default async function Product({ params, searchParams }: Props) {
       </div>
       <div className="product-info">
         <section className="panel product-about">
-          <h2>About this fragrance</h2>
+          <h2>About this watch</h2>
           <Markdown body={p.description.replace(/^##? [^\n]+\n*/, "")} ugc={env.DEMO_MODE} />
         </section>
-        {p.notes.length > 0 && (
+        {p.features.length > 0 && (
           <section className="panel">
-            <h2>Scent pyramid</h2>
-            <div className="pyramid">
-              {(
-                [
-                  ["top", "Top", "The first impression"],
-                  ["heart", "Heart", "Once it settles"],
-                  ["base", "Base", "What lingers"],
-                ] as const
-              ).map(([position, title, hint]) => {
-                const notes = p.notes.filter((n) => n.position === position);
-                return notes.length ? (
-                  <div key={position} className="pyramid-tier">
+            <h2>Features</h2>
+            <div className="feature-groups">
+              {featureGroups.map((group) => {
+                const items = p.features.filter((f) => f.feature.group === group);
+                return items.length ? (
+                  <div key={group} className="feature-group">
                     <p>
-                      <strong>{title}</strong> <span>{hint}</span>
+                      <strong>{label(group)}</strong>
                     </p>
                     <div className="chip-list">
-                      {notes.map((n) => (
-                        <Link key={n.note.id} className="chip link" href={`/products?note=${n.note.slug}`}>
-                          {n.note.name}
+                      {items.map((f) => (
+                        <Link key={f.feature.id} className="chip link" href={`/products?feature=${f.feature.slug}`}>
+                          {f.feature.name}
                         </Link>
                       ))}
                     </div>
@@ -155,19 +156,28 @@ export default async function Product({ params, searchParams }: Props) {
           </section>
         )}
         <section className="panel product-specs">
-          <h2>Details</h2>
+          <h2>Specifications</h2>
           <dl className="spec-list">
-            {Object.entries({
-              Brand: p.brand.name,
-              "Brand type": label(p.brand.brandType),
-              Concentration: label(p.concentration),
-              "For whom": label(p.gender),
-              Packaging: label(p.packaging),
-              Family: p.fragranceFamily,
-              Perfumer: p.perfumer,
-              "Launch year": p.launchYear,
-              Origin: p.countryOfOrigin,
-            })
+            {(
+              [
+                ["Brand", p.brand.name],
+                ["Brand type", label(p.brand.brandType)],
+                ["Reference", p.referenceNo],
+                ["Movement", label(p.movement)],
+                ["Style", p.style ? label(p.style) : null],
+                ["For whom", label(p.gender)],
+                ["Case size", p.caseSizeMm !== null ? `${p.caseSizeMm} mm` : null],
+                ["Case material", p.caseMaterial ? label(p.caseMaterial) : null],
+                ["Strap", p.strapType ? label(p.strapType) : null],
+                ["Glass", p.glass ? label(p.glass) : null],
+                ["Dial colour", p.dialColor],
+                ["Water resistance", p.waterResistanceM !== null ? `${p.waterResistanceM} m` : null],
+                ["Condition", label(p.condition)],
+                ["Warranty", p.warrantyMonths ? `${p.warrantyMonths} months` : null],
+                ["Launch year", p.launchYear],
+                ["Origin", p.countryOfOrigin],
+              ] as [string, string | number | null][]
+            )
               .filter(([, value]) => value !== null && value !== "")
               .map(([key, value]) => (
                 <div key={key}>
