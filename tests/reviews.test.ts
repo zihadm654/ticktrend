@@ -45,15 +45,15 @@ before(async () => {
   server = await import("../src/lib/reviews/server");
   await migrate(database.db, { migrationsFolder: join(project, "src/db/migrations") });
   const db = database.db;
-  await db.insert(brands).values({ id: "b", name: "Review House", slug: "review-house", brandType: "niche" });
+  await db.insert(brands).values({ id: "b", name: "Review House", slug: "review-house", brandType: "imported" });
   await db.insert(products).values([
-    { id: "bought", name: "Bought", slug: "bought", brandId: "b", gender: "men", concentration: "edp" },
-    { id: "other", name: "Other", slug: "other", brandId: "b", gender: "men", concentration: "edp" },
+    { id: "bought", name: "Bought", slug: "bought", brandId: "b", gender: "men", movement: "quartz" },
+    { id: "other", name: "Other", slug: "other", brandId: "b", gender: "men", movement: "quartz" },
   ]);
   await db.insert(productVariants).values([
-    { id: "bought-50", productId: "bought", sku: "B-50", sizeMl: 50, price: 1000, retailPrice: 1000 },
-    { id: "bought-100", productId: "bought", sku: "B-100", sizeMl: 100, price: 1800, retailPrice: 1800 },
-    { id: "other-50", productId: "other", sku: "O-50", sizeMl: 50, price: 900, retailPrice: 900 },
+    { id: "bought-50", productId: "bought", sku: "B-50", optionLabel: "Black dial", price: 1000, retailPrice: 1000 },
+    { id: "bought-100", productId: "bought", sku: "B-100", optionLabel: "Blue dial", price: 1800, retailPrice: 1800 },
+    { id: "other-50", productId: "other", sku: "O-50", optionLabel: "Black dial", price: 900, retailPrice: 900 },
   ]);
   await db.insert(customers).values([
     { id: "c1", phone: "+8801711111111", name: "Delivered Buyer" },
@@ -66,9 +66,9 @@ before(async () => {
     { id: "o2", orderNumber: "T-2", customerId: "c2", customerName: "Pending Buyer", customerPhone: "+8801722222222", status: "shipped", subtotal: 1000, total: 1000, ...base },
   ]);
   await db.insert(orderItems).values([
-    // Bought in a different size than the one reviewed: still verified, it's the same product.
-    { orderId: "o1", variantId: "bought-100", productName: "Bought", variantLabel: "100 ml", brandName: "Review House", unitPrice: 1800, quantity: 1, lineTotal: 1800 },
-    { orderId: "o2", variantId: "bought-50", productName: "Bought", variantLabel: "50 ml", brandName: "Review House", unitPrice: 1000, quantity: 1, lineTotal: 1000 },
+    // Bought in a different option than the one reviewed: still verified, it's the same product.
+    { orderId: "o1", variantId: "bought-100", productName: "Bought", variantLabel: "Blue dial", brandName: "Review House", unitPrice: 1800, quantity: 1, lineTotal: 1800 },
+    { orderId: "o2", variantId: "bought-50", productName: "Bought", variantLabel: "Black dial", brandName: "Review House", unitPrice: 1000, quantity: 1, lineTotal: 1000 },
   ]);
 });
 after(async () => {
@@ -77,7 +77,7 @@ after(async () => {
   if (temporary) rmSync(temporary, { recursive: true, force: true });
 });
 
-test("verified purchase = phone has a DELIVERED order containing any size of the product", async () => {
+test("verified purchase = phone has a DELIVERED order containing any option of the product", async () => {
   assert.equal(await server.hasDeliveredPurchase("+8801711111111", "bought"), true);
   assert.equal(await server.hasDeliveredPurchase("+8801711111111", "other"), false, "different product");
   assert.equal(await server.hasDeliveredPurchase("+8801722222222", "bought"), false, "shipped is not delivered");

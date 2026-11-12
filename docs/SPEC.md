@@ -1,6 +1,6 @@
-# Attar — Functional Specification
+# TickTrendFit — Functional Specification
 
-Open-source perfume e-commerce template: Jomashop-grade storefront + admin panel,
+Open-source watch e-commerce template: Jomashop-grade storefront + admin panel,
 manual (phone-confirmed) order fulfillment, zero-cost deployment.
 
 > **How to read this document.** §1–3 define scope and structure. §4 is the complete
@@ -14,11 +14,11 @@ manual (phone-confirmed) order fulfillment, zero-cost deployment.
 
 ## 1. Product definition
 
-**Attar** is a template a perfume retailer forks and deploys as their own store.
+**TickTrendFit** is a template a watch retailer forks and deploys as their own store.
 
 - **Storefront**: Jomashop-style deal-driven catalog browsing — brand-first
-  navigation, faceted filtering (notes, concentration, gender, size…), strikethrough
-  MSRP pricing, image-heavy product pages.
+  navigation, faceted filtering (movement, case size, brand type, condition…),
+  strikethrough MSRP pricing, image-heavy product pages.
 - **Ordering**: no payment gateway. Customer places an order with name + phone +
   address; chooses Cash on Delivery or manual bKash/Nagad (sends money, enters
   TrxID). The shop team is notified instantly (console/email/Telegram), calls the
@@ -31,7 +31,7 @@ manual (phone-confirmed) order fulfillment, zero-cost deployment.
 
 | User | Needs |
 |---|---|
-| **Shopper (BD consumer)** | Browse/filter perfumes, trust the shop, order with phone number only, track order without an account |
+| **Shopper (BD consumer)** | Browse/filter watches, trust the shop, order with phone number only, track order without an account |
 | **Shop team (1–3 people)** | See new orders instantly, call & confirm, manage catalog/banners/stock from a phone-friendly admin |
 | **Retailer/developer forking the template** | Rebrand via one config file, deploy free, extend with AI assistance |
 | **AI agent configuring the template** | Predictable structure, typed config, machine-readable instructions (`AGENTS.md`) |
@@ -56,7 +56,7 @@ design may make these impossible later.
 | `/products/[slug]` | Product detail page |
 | `/brands` | Brand index, A–Z (J) |
 | `/brands/[slug]` | Brand PLP (brand hero + filtered catalog) |
-| `/c/[slug]` | Collection PLP (e.g. `/c/men`, `/c/niche`, `/c/oud`) — a saved filter set with landing content |
+| `/c/[slug]` | Collection PLP (e.g. `/c/men`, `/c/automatic`, `/c/sport`) — a saved filter set with landing content |
 | `/search?q=` | Search results (PLP layout) |
 | `/cart` | Cart page (also a header drawer) |
 | `/checkout` | Checkout form |
@@ -74,7 +74,7 @@ design may make these impossible later.
 | `/admin/orders`, `/admin/orders/[id]` | Order pipeline; order detail with notes timeline |
 | `/admin/products`, `/admin/products/new`, `/admin/products/[id]` | Catalog management |
 | `/admin/brands` | Brand CRUD |
-| `/admin/taxonomy` | Notes, fragrance families, collections |
+| `/admin/taxonomy` | Feature groups, collections |
 | `/admin/banners` | Announcement bar, hero banners, event cards, homepage layout |
 | `/admin/customers`, `/admin/customers/[id]` | Customer list & history |
 | `/admin/coupons` | Coupon CRUD (v2) |
@@ -107,7 +107,7 @@ Server Actions handle all mutations. The only REST endpoints:
    UI, routes, and queries must not render/execute.
 8. **Mobile-first.** BD traffic is overwhelmingly Android phones. Every page must
    be excellent at 360 px wide before desktop styling is considered done.
-9. **Seed data is fictional.** No real perfume brand names, product names, or
+9. **Seed data is fictional.** No real watch brand names, product names, or
    photos in the repo (trademark/copyright). Seeded brands/products are invented.
 
 ---
@@ -126,33 +126,39 @@ Implement in `src/db/schema.ts` (Drizzle, Postgres dialect).
 
 ### 4.2 Tables
 
-**brands** — `id, name, slug (uq), brand_type enum('designer','niche','arabian','celebrity','local'), logo_url?, hero_image_url?, description?, is_featured bool, sort_order int`
+**brands** — `id, name, slug (uq), brand_type enum('imported','mastercopy','firstcopy','local'), logo_url?, hero_image_url?, description?, is_featured bool, sort_order int`
 
 **collections** — saved filter sets that act as merchandised landing pages
-(`/c/men`, `/c/oud`). `id, name, slug (uq), description?, hero_image_url?,
+(`/c/men`, `/c/automatic`). `id, name, slug (uq), description?, hero_image_url?,
 filter_json jsonb (same shape as PLP query params), sort_order, is_active`
 
-**notes** — fragrance notes taxonomy. `id, name (uq), slug (uq), group
-enum('citrus','floral','woody','oriental','fresh','spicy','sweet','musky','green','aquatic')`
+**features** — watch feature taxonomy, grouped for the PDP and filters.
+`id, name (uq), slug (uq), group
+enum('display','complications','durability','movement','case','strap')`
 
 **products** —
-`id, name, slug (uq), brand_id fk, collection_name? (series like "Aventus" (J)),
+`id, name, slug (uq), brand_id fk, collection_name? (series like "Meridian" (J)),
 description text (rich), gender enum('men','women','unisex'),
-concentration enum('edt','edp','parfum','extrait','edc','oil','attar'),
-packaging enum('standard','tester','sample','mini','gift_set') default standard,
-fragrance_family?, perfumer?, launch_year int?, country_of_origin?,
+condition enum('new','open_box','refurbished','used') default new,
+movement enum('quartz','automatic','mechanical','solar','digital','smart'),
+style? (dress | sport | casual | digital), case_size_mm int?, case_material
+enum('stainless_steel','alloy','titanium','ceramic','gold_plated','plastic'),
+strap_type enum('leather','steel','mesh','rubber','silicone','fabric'),
+glass? (mineral | sapphire | acrylic), water_resistance_m int?, dial_color?,
+reference_no?, warranty_months int?, launch_year int?, country_of_origin?,
 ground_shipping_only bool default false, is_featured bool, is_active bool,
 meta jsonb (spare)`
 
-**product_notes** — join. `product_id fk, note_id fk, position
-enum('top','heart','base'), pk(product_id, note_id, position)`
+**product_features** — join. `product_id fk, feature_id fk,
+pk(product_id, feature_id)`. A product shows one feature per group at most.
 
-**product_variants** — the purchasable unit.
-`id, product_id fk, sku (uq), size_ml int, size_label? ("100 ml"),
+**product_variants** — the purchasable unit. Watch variants are dial/strap
+options, not sizes.
+`id, product_id fk, sku (uq), option_label ("Black dial · steel strap"),
 retail_price int (MSRP), price int (asking/sale), cost_price int? (admin-only),
 stock_quantity int default 0, low_stock_override int?, barcode?,
 is_default bool, is_active bool`
-Constraint: `price <= retail_price`. A product has ≥1 variant; single-size
+Constraint: `price <= retail_price`. A product has ≥1 variant; single-option
 products still get one variant (uniform code path).
 
 **product_images** — `id, product_id fk, url, alt, sort_order int`
@@ -163,7 +169,7 @@ jsonb?, tags text[], internal_note?, is_blocked bool default false`
 (`is_blocked` matters: fake-order harassment is a real BD COD problem)
 
 **orders** —
-`id, order_number (uq, human-readable "ATR-1042" — prefix from config + sequence),
+`id, order_number (uq, human-readable "TTF-1042" — prefix from config + sequence),
 customer_id fk, status enum('pending','confirmed','packed','shipped','delivered',
 'cancelled','returned') default pending,
 customer_name, customer_phone, customer_email? (denormalized snapshot),
@@ -273,7 +279,7 @@ carousels are the shadcn/embla carousel with touch support.
 
 ### ST-05 · Product card (shared component)
 (J) Image (aspect 1:1) swapping to 2nd image on hover; brand name bold;
-product name (2-line clamp); concentration + size line ("EDP · 100 ml");
+product name (2-line clamp); movement + case size line ("Quartz · 40 mm");
 `-36%` deal badge (config `theme.deal` color) when `price < retail_price` and
 `features.dealBadges`; `৳510` struck + `৳375` price; "Limited stock" tag when
 `0 < stock ≤ lowStockThreshold`; "Out of stock" overlay state; wishlist heart
@@ -287,10 +293,13 @@ Breadcrumb, H1, result count (J), sort select: Newest / Price low→high /
 Price high→low / Biggest discount / Name. Filter sidebar (desktop) & filter
 sheet (mobile) with active-filter chips:
 - Brand (searchable checkbox list, A–Z index when >20 brands (J))
-- Gender, Concentration, Packaging, Fragrance family
-- Notes (grouped by note group) (J "Fragrance Notes Group")
-- Size buckets (<50 / 50–99 / 100+ ml), Price range (min/max inputs),
-  Availability (in stock), Deals only (has discount) (J "Coupon Offers" analog)
+- Brand type, Gender, Movement, Case material, Strap, Dial colour, Glass, Style,
+  Condition
+- Features (grouped by feature group) (J "Fragrance Notes Group" analog)
+- Case size buckets (under 36 / 36–40 / 41–44 / 45+ mm), Water resistance
+  (minimum: 30 m+ / 50 m+ / 100 m+ / 200 m+ / 300 m+), Price range (min/max
+  inputs), Availability (in stock), Deals only (has discount) (J "Coupon Offers"
+  analog)
 All filter state lives in URL query params (shareable, SSR-rendered, indexed).
 Numbered pagination (J), `pageSize` from config.
 **Accept:** any filter combination returns correct results via one composable
@@ -303,29 +312,30 @@ Left: gallery — main image w/ tap-to-zoom lightbox + thumbnail strip.
 Right buy box, in order: linked brand; H1; SKU line; stock badge
 (`IN STOCK` / `LOW STOCK — only N left` / `OUT OF STOCK`); deal badge;
 price stack (`Retail ৳X` struck / `৳Y` / "You save ৳Z (36%)") (J);
-**variant selector** (size buttons; disabled when variant out of stock);
-quantity stepper; Add to cart (sticky bottom bar on mobile); wishlist;
+**variant selector** (dial/strap option buttons; disabled when variant out of
+stock); quantity stepper; Add to cart (sticky bottom bar on mobile); wishlist;
 delivery promise block from config zones ("Inside Dhaka: 1-2 days ৳70 …");
 payment methods line ("COD · bKash"); authenticity/trust block (J);
-phone + WhatsApp "Ask about this product" links.
-Below: Description (rich text); **Notes pyramid** — Top/Heart/Base chips
-linking to `/products?note=` (our upgrade over Jomashop's prose-only notes);
-spec table (Brand, Type, Concentration, Size, Gender, Family, Perfumer,
-Launch year, Origin, Barcode) (J); Related products (same brand or shared
-notes, excluding self, max 8).
-**Accept:** JSON-LD `Product` schema; `generateMetadata` per product; ground
-`ground_shipping_only` renders a shipping-restriction note; 404 for
-inactive/unknown slugs.
+phone + WhatsApp "Ask about this watch" links.
+Below: Description (rich text); **Features** — grouped chips (Display,
+Complications, Durability, Movement, Case, Strap) linking to `/products?feature=`
+(our upgrade over Jomashop's prose-only specs); spec table (Brand, Brand type,
+Reference, Movement, Style, Gender, Case size, Case material, Strap, Glass, Dial
+colour, Water resistance, Condition, Warranty, Launch year, Origin) (J); Related
+products (same brand or shared features, excluding self, max 8).
+**Accept:** JSON-LD `Product` schema with condition-accurate `itemCondition`;
+`generateMetadata` per product; `ground_shipping_only` renders a
+shipping-restriction note; 404 for inactive/unknown slugs.
 
 ### ST-08 · Search
 Header search → `/search?q=`. Postgres ILIKE + trigram-ish matching across
-product name, brand name, collection_name, description. PLP layout with all
-filters available. v2: `/api/search/suggest` powering a dropdown with top 5
-products (thumb + price) + matching brands, debounced 150 ms, keyboard
+product name, brand name, collection_name, description and reference number. PLP
+layout with all filters available. v2: `/api/search/suggest` powering a dropdown
+with top 5 products (thumb + price) + matching brands, debounced 150 ms, keyboard
 navigable (J).
 
 ### ST-09 · Cart
-Client state in localStorage (`attar-cart-v1`), context provider +
+Client state in localStorage (`ttf-cart-v1`), context provider +
 `useCart()`. Line = variantId + qty. Drawer (J) + `/cart` page: item rows
 (image, name, variant, unit price, qty stepper, remove), subtotal, "delivery
 calculated at checkout", free-delivery progress bar when config'd
@@ -367,7 +377,7 @@ scoped to brand.
 
 ### ST-13 · Collections
 `/c/[slug]`: hero + PLP pre-filtered by `filter_json`, user can refine further.
-Powers nav items like Men / Niche / Oud / Gift Sets without code changes.
+Powers nav items like Men / Automatic / Dress / Deals without code changes.
 
 ### ST-14 · Wishlist & recently viewed (flag-gated)
 Both localStorage, no server writes. `/wishlist` renders product cards from
@@ -445,31 +455,32 @@ optimistic + Server Actions.
 post-confirmation cancel/return; every mutation lands in the timeline.
 
 ### AD-05 · Products list
-Table: thumb, name, brand, concentration, variants count, price range, total
+Table: thumb, name, brand, movement, variants count, price range, total
 stock (red badge ≤ threshold), active toggle, featured toggle. Search + brand
 / status / stock filters. Bulk activate/deactivate. "New product" CTA.
 
 ### AD-06 · Product editor
 Tabbed form (create + edit share it):
 1. **Basics** — name, brand (searchable select + inline "new brand" dialog),
-   collection name, gender, concentration, packaging, family, description
-   (markdown textarea w/ preview), perfumer, launch year, origin, flags
-   (active, featured, ground-shipping-only).
-2. **Variants** — inline-editable rows: size ml, label, SKU (auto-suggested
-   `BRAND-PRODUCT-100` pattern), retail price, price, stock, barcode, default
+   collection name, gender, condition, movement, style, case size, case
+   material, strap, glass, water resistance, dial colour, reference number,
+   warranty months, launch year, origin, description (markdown textarea w/
+   preview), flags (active, featured, ground-shipping-only).
+2. **Variants** — inline-editable rows: option label, SKU (auto-suggested
+   `BRAND-PRODUCT-OPTION` pattern), retail price, price, stock, barcode, default
    radio, active. Guard: ≥1 variant, exactly 1 default. Price > retail blocked.
 3. **Images** — uploader (drag-drop + file picker) → storage adapter; sortable
    thumbnails (0 = primary, 1 = hover); alt text; delete. Client-side resize
    to ≤1600 px WebP before upload.
-4. **Notes** — three multi-select pickers (Top/Heart/Base) over notes taxonomy,
-   grouped by note group; inline "create note".
+4. **Features** — grouped multi-select (Display, Complications, Durability,
+   Movement, Case, Strap) over the feature taxonomy; inline "create feature".
 Slug auto-generated, editable, uniqueness-checked. Zod-validated Server
 Actions; per-field errors.
 
 ### AD-07 · Brands & taxonomy
 `/admin/brands`: CRUD table — name, type, logo upload, hero image, description,
 featured, sort. Delete blocked if products exist (offer deactivate).
-`/admin/taxonomy`: tabs for Notes (name + group; merge tool nice-to-have) and
+`/admin/taxonomy`: tabs for Features (name + group; merge tool nice-to-have) and
 Collections (name, slug, hero, description, `filter_json` via a **filter
 builder UI** identical to PLP sidebar, active, sort).
 
@@ -522,12 +533,12 @@ Implement §4 in `src/db/schema.ts`. Scripts: `db:push` (dev), `db:generate` +
 
 ### PF-04 · Seed
 `pnpm db:seed` (idempotent — safe to re-run): admin user from env; ~10
-fictional brands across brand types; notes taxonomy (~60 notes, all groups);
-~40 products with variants/notes/generated placeholder images (branded
-gradient + name SVGs committed to `public/seed/`); 4 collections
-(Men/Women/Niche/Deals); homepage sections + banners mirroring the Jomashop
-anatomy; static pages; 15 demo orders across all statuses with realistic
-event timelines; 2 coupons.
+fictional watch houses across the four brand types; feature taxonomy (~48
+features across all six groups); ~40 watch models with dial/strap options,
+features and generated placeholder images (branded gradient + name SVGs committed
+to `public/seed/`); 4 collections (Men/Women/Automatic/Deals); homepage sections
++ banners mirroring the Jomashop anatomy; static pages; 15 demo orders across all
+statuses with realistic event timelines; 2 coupons.
 **A fresh clone must demo like a real store.**
 
 ### PF-05 · Adapters
@@ -570,7 +581,7 @@ no PII in logs beyond what admins need.
 
 | Area | Requirement |
 |---|---|
-| Performance | PLP/PDP LCP < 2.5 s on mid-range Android over 4G; `next/image` everywhere; PLP queries indexed (brand_id, price, gender, concentration). Search matches `ILIKE` across name, brand, description and collection (~120 ms at 20,000 products); a name-only GIN index was dropped as unused (Phase 6 finding) |
+| Performance | PLP/PDP LCP < 2.5 s on mid-range Android over 4G; `next/image` everywhere; PLP queries indexed (brand_id, price, gender, movement, condition, case size). Search matches `ILIKE` across name, brand, description, collection and reference (~120 ms at 20,000 products); a name-only GIN index was dropped as unused (Phase 6 finding) |
 | Accessibility | Semantic landmarks, focus states, alt text enforced in admin, filter sidebar operable by keyboard, WCAG AA contrast for both theme colors (documented check) |
 | SEO | See ST-16. Storefront is fully crawlable server-rendered HTML |
 | Security | See PF-09 + Better Auth defaults; admin cookies httpOnly/secure/sameSite |
@@ -583,10 +594,11 @@ no PII in logs beyond what admins need.
 
 | Term | Meaning |
 |---|---|
-| Concentration | Perfume oil strength class: EDC < EDT < EDP < Parfum < Extrait; `oil`/`attar` = alcohol-free oils |
-| Notes pyramid | Top (opening) / Heart (middle) / Base (drydown) scent notes |
-| Tester | Genuine product in plain packaging, sold cheaper (J filter) |
-| Decant/Sample | Small quantity repackaged from an original bottle |
+| Brand type | Sourcing tier: **imported**, **master copy**, **first copy**, **local** (copy tiers are labelled on every page) |
+| Features | Grouped watch attributes: display, complications, durability, movement, case, strap |
+| Case size | Lug-to-lug diameter in millimetres; filters bucket it under 36 / 36–40 / 41–44 / 45+ |
+| Water resistance | Minimum depth rating in metres (30 m+ … 300 m+) |
+| Condition | New, open box, refurbished or used stock |
 | TrxID | bKash/Nagad transaction id the customer receives after sending money |
 | COD | Cash on delivery — dominant BD payment method |
 | PLP / PDP | Product listing page / product detail page |

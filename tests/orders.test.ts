@@ -27,13 +27,13 @@ before(async () => {
   await migrate(database.db, { migrationsFolder: join(project, "src/db/migrations") });
   await migrate(database.db, { migrationsFolder: join(project, "src/db/migrations") });
   await database.db.insert(brands).values({ id: "test-brand", name: "Fixture House", slug: "fixture-house", brandType: "local" });
-  await database.db.insert(products).values({ id: "test-product", name: "Fixture Mist", slug: "fixture-mist", brandId: "test-brand", gender: "unisex", concentration: "edp" });
+  await database.db.insert(products).values({ id: "test-product", name: "Fixture Mist", slug: "fixture-mist", brandId: "test-brand", gender: "unisex", movement: "quartz" });
   await database.db.insert(customers).values({ id: "test-customer", name: "Fixture Customer", phone: "+8801712345678" });
 });
 after(async () => { if (database) await database.closeDb(); process.chdir(project); if (temporary) rmSync(temporary, { recursive: true, force: true }); });
 
 async function variant(stock = 10) {
-  const [row] = await database.db.insert(productVariants).values({ productId: "test-product", sku: crypto.randomUUID(), sizeMl: 50, price: 100, retailPrice: 150, stockQuantity: stock }).returning();
+  const [row] = await database.db.insert(productVariants).values({ productId: "test-product", sku: crypto.randomUUID(), optionLabel: "Black dial · steel strap", price: 100, retailPrice: 150, stockQuantity: stock }).returning();
   return row;
 }
 async function pending(lines: { id: string | null; quantity: number }[]) {

@@ -37,7 +37,7 @@ for (const url of urls) {
 }
 const malformed = await get('/products?minPrice=invalid&maxPrice=NaN&sort=invalid');
 assert(!malformed.includes('We could not load this page'));
-assert((await get('/search?q=there-is-no-such-fragrance')).includes('No fragrances found'));
+assert((await get('/search?q=there-is-no-such-watch')).includes('No watches found'));
 const missing = await fetch(new URL('/products/no-such-product', origin));
 const missingHtml = await missing.text();
 assert(missingHtml.includes('Page not found'));

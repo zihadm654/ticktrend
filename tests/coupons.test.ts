@@ -135,8 +135,8 @@ before(async () => {
   server = await import("../src/lib/coupons/server");
   await migrate(database.db, { migrationsFolder: join(project, "src/db/migrations") });
   await database.db.insert(brands).values({ id: "coupon-brand", name: "Coupon House", slug: "coupon-house", brandType: "local" });
-  await database.db.insert(products).values({ id: "coupon-product", name: "Test Oud", slug: "test-oud", brandId: "coupon-brand", gender: "unisex", concentration: "edp" });
-  await database.db.insert(productVariants).values({ id: "coupon-variant", productId: "coupon-product", sku: "CPN-1", sizeMl: 50, price: 2500, retailPrice: 3000, stockQuantity: 50 });
+  await database.db.insert(products).values({ id: "coupon-product", name: "Test Oud", slug: "test-oud", brandId: "coupon-brand", gender: "unisex", movement: "quartz" });
+  await database.db.insert(productVariants).values({ id: "coupon-variant", productId: "coupon-product", sku: "CPN-1", optionLabel: "Black dial · steel strap", price: 2500, retailPrice: 3000, stockQuantity: 50 });
 });
 after(async () => {
   await database?.closeDb();

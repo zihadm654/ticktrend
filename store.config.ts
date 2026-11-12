@@ -162,8 +162,8 @@ const config: StoreConfig = {
   },
 
   contact: {
-    phone: "+880 1700-000000",
-    whatsapp: "+8801700000000",
+    phone: "+880 1757-573963",
+    whatsapp: "+8801757573963",
     email: "hello@example.com",
     addressLines: ["House 1, Road 1, Gulshan", "Dhaka 1212, Bangladesh"],
     social: {
@@ -207,16 +207,16 @@ const config: StoreConfig = {
       },
       bkash: {
         enabled: true,
-        number: "01700000000",
+        number: "01533737887",
         accountType: "personal",
         instructions:
           "Send the total amount to the bKash number above (Send Money), then enter the Transaction ID (TrxID) below. We verify it during your confirmation call.",
       },
       nagad: {
-        enabled: false,
-        number: null,
+        enabled: true,
+        number: "01757573963",
         accountType: "personal",
-        instructions: "",
+        instructions: "Send the total amount to the bKash number above (Send Money), then enter the Transaction ID (TrxID) below. We verify it during your confirmation call.",
       },
     },
     confirmationNote:

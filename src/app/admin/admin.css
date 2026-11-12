@@ -2960,8 +2960,8 @@ a.admin-kpi:hover .admin-kpi-arrow {
 .admin-gallery-add small {
   color: var(--muted);
 }
-  border-color: transparent;
-}
+  /*border-color: transparent;
+}*/
 .admin-media-preview {
   display: grid;
   gap: 10px;

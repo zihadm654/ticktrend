@@ -55,7 +55,7 @@ before(async () => {
       slug: "rain-archive",
       brandId: "checkout-brand",
       gender: "unisex",
-      concentration: "edp",
+      movement: "quartz",
     });
 });
 after(async () => {
@@ -69,7 +69,7 @@ async function variant(stock = 7) {
     .values({
       productId: "checkout-product",
       sku: crypto.randomUUID(),
-      sizeMl: 50,
+      optionLabel: "Black dial · steel strap",
       price: 1700,
       retailPrice: 2400,
       stockQuantity: stock,

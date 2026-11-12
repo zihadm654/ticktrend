@@ -59,11 +59,11 @@ before(async () => {
   await migrate(database.publicDb, { migrationsFolder: join(project, "src/db/migrations") });
   // A small store touching every kind of copied data.
   await database.publicDb.insert(s.brands).values({ id: "brand", name: "Meral House", slug: "meral-house", brandType: "local" });
-  await database.publicDb.insert(s.products).values({ id: "product", name: "Rain Archive", slug: "rain-archive", brandId: "brand", gender: "unisex", concentration: "edp" });
-  await database.publicDb.insert(s.productVariants).values({ id: "variant", productId: "product", sku: "RA-50", sizeMl: 50, price: 1700, retailPrice: 2400, stockQuantity: 9 });
+  await database.publicDb.insert(s.products).values({ id: "product", name: "Rain Archive", slug: "rain-archive", brandId: "brand", gender: "unisex", movement: "quartz" });
+  await database.publicDb.insert(s.productVariants).values({ id: "variant", productId: "product", sku: "RA-50", optionLabel: "Black dial", price: 1700, retailPrice: 2400, stockQuantity: 9 });
   await database.publicDb.insert(s.productImages).values({ productId: "product", url: "/seed/x.webp", alt: "Rain Archive" });
-  await database.publicDb.insert(s.notes).values({ id: "note", name: "Rain", slug: "rain", group: "fresh" });
-  await database.publicDb.insert(s.productNotes).values({ productId: "product", noteId: "note", position: "top" });
+  await database.publicDb.insert(s.features).values({ id: "feature", name: "Luminous hands", slug: "luminous-hands", group: "display" });
+  await database.publicDb.insert(s.productFeatures).values({ productId: "product", featureId: "feature" });
   await database.publicDb.insert(s.coupons).values({ code: "WELCOME", type: "percent", value: 10 });
   await database.publicDb.insert(s.settings).values({ key: "demo", value: { ok: true } });
   await database.publicDb.insert(s.homepageSections).values({ type: "hero", title: "Welcome" });
