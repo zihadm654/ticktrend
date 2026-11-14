@@ -197,7 +197,7 @@ const config: StoreConfig = {
         etaDays: "3-5 days",
       },
     ],
-    freeDeliveryOver: 5000,
+    freeDeliveryOver: 2000,
     paymentMethods: {
       cod: {
         enabled: true,
@@ -250,7 +250,7 @@ const config: StoreConfig = {
         text: "New arrivals: fresh dials and straps",
         href: "/products?deal=true",
       },
-      { text: "Free delivery on orders over ৳5,000", href: null },
+      { text: "Free delivery on orders over ৳2,000", href: null },
     ],
   },
 
