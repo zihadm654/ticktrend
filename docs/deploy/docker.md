@@ -1,6 +1,6 @@
 # Self-host with Docker
 
-Run Attar on any machine with Docker: a VPS, a home server, or a free cloud
+Run TickTrendFit on any machine with Docker: a VPS, a home server, or a free cloud
 VM (Oracle Cloud's Always Free tier, for example). This is the free path
 that's also fine for a real business, because you're not bound by a hosting
 plan's non-commercial terms.
@@ -17,7 +17,7 @@ The repo ships with:
 On the server, with Docker and Docker Compose installed:
 
 ```bash
-git clone https://github.com/<you>/<your-fork>.git attar && cd attar
+git clone https://github.com/<you>/<your-fork>.git ticktrendfit && cd ticktrendfit
 cp .env.example .env
 ```
 
@@ -56,7 +56,7 @@ shop.example.com {
 ```
 
 Rate limits (checkout, order tracking, reviews, admin sign-in) key on the
-client address. Attar takes it from the last hop in `X-Forwarded-For`, which
+client address. TickTrendFit takes it from the last hop in `X-Forwarded-For`, which
 Caddy and nginx append for you. **Don't expose port 3000 directly to the
 internet**, or clients can pick their own address. Per-phone limits still
 apply either way. With Caddy on the same machine, bind the app to localhost
@@ -78,11 +78,11 @@ Everything that matters is in two volumes:
 
 | Volume | Contents | Back up with |
 |---|---|---|
-| `db` | Postgres data | `docker compose exec db pg_dump -U attar attar > attar-$(date +%F).sql` |
-| `uploads` | admin-uploaded images (`STORAGE_ADAPTER=local`) | `docker run --rm -v attar_uploads:/data -v "$PWD":/backup alpine tar czf /backup/uploads.tgz -C /data .` |
+| `db` | Postgres data | `docker compose exec db pg_dump -U ttf ttf > ttf-$(date +%F).sql` |
+| `uploads` | admin-uploaded images (`STORAGE_ADAPTER=local`) | `docker run --rm -v ttf_uploads:/data -v "$PWD":/backup alpine tar czf /backup/uploads.tgz -C /data .` |
 
-The volume name is prefixed with the project directory name (`attar_` if you
-cloned into `attar/`). Check it with `docker volume ls`. To keep images in
+The volume name is prefixed with the project directory name (`ticktrendfit_` if you
+cloned into `ticktrendfit/`). Check it with `docker volume ls`. To keep images in
 object storage instead, see [storage.md](storage.md).
 
 ## Using an external database
@@ -94,10 +94,10 @@ To use Neon or another managed Postgres instead of the bundled one, set
 ## Building the image on its own
 
 ```bash
-docker build -t attar .                          # web server
-docker build -t attar-tools --target tools .     # migrate + seed runner
-docker run --rm --env-file .env attar-tools      # needs DATABASE_URL in .env
-docker run -d -p 3000:3000 --env-file .env -v attar-data:/app/.data attar
+docker build -t ticktrendfit .                          # web server
+docker build -t ticktrendfit-tools --target tools .     # migrate + seed runner
+docker run --rm --env-file .env ticktrendfit-tools      # needs DATABASE_URL in .env
+docker run -d -p 3000:3000 --env-file .env -v ticktrendfit-data:/app/.data ticktrendfit
 ```
 
 No database is needed at build time.

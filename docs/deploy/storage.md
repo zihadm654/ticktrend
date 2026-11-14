@@ -1,6 +1,6 @@
 # Image storage: Cloudflare R2 (or any S3-compatible bucket)
 
-Attar stores admin-uploaded product images with one of two adapters:
+TickTrendFit stores admin-uploaded product images with one of two adapters:
 
 | `STORAGE_ADAPTER` | Where images go | Use it on |
 |---|---|---|
@@ -19,7 +19,7 @@ within the free tier. If you'd rather not add a card, use
 [Supabase Storage](#other-providers) instead.
 
 1. In the Cloudflare dashboard, open **R2 Object Storage** and create a bucket,
-   for example `attar-uploads`.
+   for example `ttf-uploads`.
 2. Open the bucket's **Settings → Public access** and enable the **r2.dev
    subdomain**, or connect your own domain. Copy the public URL, for example
    `https://pub-1234abcd.r2.dev`.
@@ -35,7 +35,7 @@ within the free tier. If you'd rather not add a card, use
    STORAGE_ADAPTER=s3
    S3_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
    S3_REGION=auto
-   S3_BUCKET=attar-uploads
+   S3_BUCKET=ttf-uploads
    S3_ACCESS_KEY_ID=<access key id>
    S3_SECRET_ACCESS_KEY=<secret access key>
    S3_PUBLIC_URL=https://pub-1234abcd.r2.dev

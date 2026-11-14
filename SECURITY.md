@@ -12,7 +12,7 @@ you'd rather stay anonymous.
 
 ## Supported versions
 
-Security fixes go into the latest release. Attar is a template you fork, so
+Security fixes go into the latest release. TickTrendFit is a template you fork, so
 pull fixes from upstream into your store.
 
 ## What's already in place

@@ -1,4 +1,4 @@
-# Attar — Implementation Plan
+# TickTrendFit - Implementation Plan
 
 Phase-by-phase build order for the spec in `docs/SPEC.md`. Written to be executed
 by a developer **or an AI coding agent**: every step names its spec tasks, its
@@ -36,7 +36,7 @@ driver wired (`src/db/index.ts`); `store.config.ts` + `src/lib/env.ts` +
 | 1.2 | Full schema | PF-03, SPEC §4 | `src/db/schema.ts` | Every §4.2 table + enums + relations + indexes (PLP filter columns, GIN on product name); `pnpm db:push` succeeds on PGlite AND on a Postgres URL |
 | 1.3 | DB scripts | PF-03 | `package.json`, `src/db/migrate.ts` | `db:push`, `db:generate`, `db:migrate`, `db:studio`, `db:seed` scripts work; first migration committed |
 | 1.4 | Order helpers | PF-06 | `src/lib/orders/transitions.ts`, `src/lib/order-number.ts` | Transition matrix enforces §4.3 exactly (table-driven); order numbers sequential w/ config prefix; both covered by a small test file |
-| 1.5 ∥ | Seed data | PF-04 | `src/db/seed.ts`, `public/seed/*` | `pnpm db:seed` idempotent; fresh clone + `db:push` + `db:seed` yields: admin login works later, ~10 fictional brands, ~60 notes, ~40 products w/ variants+notes+images, collections, banners, homepage sections, static pages, 15 orders across all statuses w/ event timelines |
+| 1.5 ∥ | Seed data | PF-04 | `src/db/seed.ts`, `public/seed/*` | `pnpm db:seed` idempotent; fresh clone + `db:push` + `db:seed` yields: admin login works later, ~10 fictional watch houses, ~48 features, ~40 watch models w/ options+features+images, collections, banners, homepage sections, static pages, 15 orders across all statuses w/ event timelines |
 | 1.6 | Theming bridge | PF-07 | `src/app/globals.css`, `src/app/layout.tsx` | `theme.primary/deal/radius` from config drive shadcn CSS vars; changing a hex in config visibly recolors the default Next page |
 
 **Gate 1:** `pnpm db:push && pnpm db:seed` from a clean clone with no `.env`;
@@ -59,7 +59,7 @@ Implemented and verified on 2026-09-17. See [verification record](PHASE_2_VERIFI
 | 2.4 | PLP | ST-06 | `/products` + shared `<ProductListing>` used by brand/collection/search | URL-param filters SSR-rendered; sidebar (desktop) + sheet (mobile); chips; sort; pagination; zero-state |
 | 2.5 ∥ | Brand pages | ST-12 | `/brands`, `/brands/[slug]` | A–Z index; brand hero + scoped PLP |
 | 2.6 ∥ | Collections | ST-13 | `/c/[slug]` | `filter_json` pre-applied, refinable |
-| 2.7 | PDP | ST-07 | Gallery+lightbox, buy box (variant selector, price stack, stock, delivery promise, trust block), notes pyramid, spec table, related products | Complete per spec except Add-to-cart button (disabled w/ tooltip "Phase 3") |
+| 2.7 | PDP | ST-07 | Gallery+lightbox, buy box (variant selector, price stack, stock, delivery promise, trust block), grouped features, spec table, related products | Complete per spec except Add-to-cart button (disabled w/ tooltip "Phase 3") |
 | 2.8 | Search v1 | ST-08 | `/search` on PLP layout | Name/brand/description matching, ranked brand-name hits first |
 | 2.9 ∥ | Static pages | ST-15 | `/pages/[slug]` markdown | Seeded pages render; footer auto-links |
 | 2.10 | Homepage | ST-04 | All 7 section types from seeded `homepage_sections` | Homepage demos like a real deal-driven store; Lighthouse perf ≥ 85 mobile on seeded data |
@@ -105,7 +105,7 @@ notification printed; stock untouched until confirmation (verify in studio).
 | 4.3 | Order detail / ticket | AD-04 | Transition buttons (legal only), cancel-reason, ship prompt, payment-verify, timeline + note/call composer | Stock decrements once on confirm; restores on post-confirm cancel/return; all mutations in timeline |
 | 4.4 | Dashboard | AD-02 | Stat cards + call queue + activity feed | Queue ordered oldest-first; tel: links work |
 | 4.5 | Storage adapter + uploads | PF-05 | local + s3 impls; `/api/uploads` w/ validation; client resize→WebP | Upload works with zero env (local) and with R2 creds (s3) |
-| 4.6 | Products list + editor | AD-05, AD-06 | 4-tab editor; variants inline table; images sortable; notes pickers | Create a full product from scratch in admin → appears correctly on storefront incl. filters |
+| 4.6 | Products list + editor | AD-05, AD-06 | 4-tab editor; variants inline table; images sortable; feature pickers | Create a full product from scratch in admin → appears correctly on storefront incl. filters |
 | 4.7 ∥ | Brands & taxonomy | AD-07 | CRUD + collection filter-builder UI | Delete-guard when products exist |
 | 4.8 ∥ | Banners & homepage | AD-08 | Placement tabs; homepage section manager w/ drag-sort | Reordering sections reorders homepage |
 | 4.9 ∥ | Customers | AD-09 | List w/ cancelled-count signal; detail; block toggle | Blocked customer's checkout politely rejected |

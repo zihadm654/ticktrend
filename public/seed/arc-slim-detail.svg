@@ -2,7 +2,7 @@
   <title id="title">Arc Slim</title><desc id="desc">Brown dial · Silicone strap. Original illustration of a fictional wristwatch.</desc>
   <defs>
     <linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#f2f3f2"/><stop offset="1" stop-color="#dfe1e0"/></linearGradient>
-    <linearGradient id="band" x1="0" x2="1"><stop stop-color="#5c3d28"/><stop offset=".5" stop-color="#8a5f3f"/><stop offset="1" stop-color="#5c3d28"/></linearGradient>
+    <linearGradient id="band" x1="0" x2="1"><stop stop-color="#3c4a52"/><stop offset=".5" stop-color="#5d6d78"/><stop offset="1" stop-color="#3c4a52"/></linearGradient>
     <linearGradient id="metal" x2="1" y2="1"><stop stop-color="#e6e9ec"/><stop offset=".35" stop-color="#aab1b8"/><stop offset=".62" stop-color="#f4f6f7"/><stop offset="1" stop-color="#8d949b"/></linearGradient>
     <filter id="shadow"><feGaussianBlur stdDeviation="18"/></filter>
   </defs>
@@ -15,13 +15,13 @@
     <line x1="450" y1="54.8" x2="450" y2="905.1999999999999" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
     <rect x="576" y="476" width="24" height="44" rx="8" fill="url(#metal)" stroke="#9ba2a9" stroke-width="1.5"/>
     <rect x="230" y="328" width="340" height="340" rx="52" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
-  <rect x="252" y="350" width="296" height="296" rx="40" fill="#925b65"/>
+  <rect x="252" y="350" width="296" height="296" rx="40" fill="#6b4a35"/>
   <rect x="252" y="350" width="296" height="296" rx="40" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>
     <line x1="400.00" y1="376.00" x2="400.00" y2="362.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="461.00" y1="392.34" x2="468.00" y2="380.22" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="505.66" y1="437.00" x2="517.78" y2="430.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="522.00" y1="498.00" x2="536.00" y2="498.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="505.66" y1="559.00" x2="517.78" y2="566.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="461.00" y1="603.66" x2="468.00" y2="615.78" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="400.00" y1="620.00" x2="400.00" y2="634.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="339.00" y1="603.66" x2="332.00" y2="615.78" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="294.34" y1="559.00" x2="282.22" y2="566.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="278.00" y1="498.00" x2="264.00" y2="498.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="294.34" y1="437.00" x2="282.22" y2="430.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="339.00" y1="392.34" x2="332.00" y2="380.22" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/>
     <line x1="400" y1="498" x2="341.02" y2="456.70" stroke="#f7f4ec" stroke-width="11" stroke-linecap="round"/>
     <line x1="400" y1="498" x2="483.14" y2="450.00" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
     <circle cx="400" cy="498" r="10" fill="#f7f4ec"/>
-    <circle cx="400" cy="498" r="4" fill="#925b65"/>
+    <circle cx="400" cy="498" r="4" fill="#6b4a35"/>
     <rect x="486" y="476" width="44" height="34" rx="5" fill="#f7f4ec"/>
     <text x="508" y="501" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#3a3f45">16</text>
   </g>

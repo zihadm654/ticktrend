@@ -295,7 +295,8 @@ sheet (mobile) with active-filter chips:
 - Brand (searchable checkbox list, A–Z index when >20 brands (J))
 - Brand type, Gender, Movement, Case material, Strap, Dial colour, Glass, Style,
   Condition
-- Features (grouped by feature group) (J "Fragrance Notes Group" analog)
+- Features (grouped by feature group: display, complications, durability,
+  movement, case, strap)
 - Case size buckets (under 36 / 36–40 / 41–44 / 45+ mm), Water resistance
   (minimum: 30 m+ / 50 m+ / 100 m+ / 200 m+ / 300 m+), Price range (min/max
   inputs), Availability (in stock), Deals only (has discount) (J "Coupon Offers"

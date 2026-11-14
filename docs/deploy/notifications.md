@@ -1,6 +1,6 @@
 # New-order alerts: Telegram or email
 
-When a customer places an order, Attar tells your team so someone can call
+When a customer places an order, TickTrendFit tells your team so someone can call
 and confirm it. Choose one adapter with `NOTIFY_ADAPTER`:
 
 | `NOTIFY_ADAPTER` | Where alerts go | Cost |

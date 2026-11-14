@@ -194,7 +194,7 @@ test("feature taxonomy validation accepts grouped watch features", () => {
     true,
   );
   assert.equal(
-    entitySchemas.features.safeParse({ name: "X", slug: "x", group: "scent" }).success,
+    entitySchemas.features.safeParse({ name: "X", slug: "x", group: "invalid-group" }).success,
     false,
   );
 });

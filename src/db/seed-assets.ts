@@ -15,10 +15,20 @@ const straps: Record<string, { light: string; dark: string }> = {
   fabric: { light: "#828a76", dark: "#5b6151" },
 };
 
+const dials: Record<string, string> = {
+  Black: "#23262b",
+  White: "#f1eee6",
+  Blue: "#2f4666",
+  Green: "#35584a",
+  Silver: "#b9bdc1",
+  Grey: "#6b7178",
+  Brown: "#6b4a35",
+};
+
 /**
  * An original still-life illustration of a fictional wristwatch: a strap band
- * behind a metallic case, a dial colour drawn from the brand, twelve markers,
- * hands at ten past ten and a date window. Deterministic per title.
+ * behind a metallic case, the dial colour and strap of the option it depicts,
+ * twelve markers, hands at ten past ten and a date window. Deterministic per title.
  */
 function artwork(
   title: string,
@@ -107,8 +117,10 @@ async function main() {
   await mkdir(directory, { recursive: true });
   const files: [string, string][] = [];
   for (const product of demoProducts) {
-    files.push([`${product.slug}.svg`, artwork(product.name, product.brand.name, product.brand.color, { strap: product.strapType })]);
-    files.push([`${product.slug}-detail.svg`, artwork(product.name, product.optionLabels[1] ?? product.brand.name, product.brand.color, { detail: true, strap: product.strapType })]);
+    const dial = dials[product.dialColor] ?? product.brand.color;
+    const dialAlt = dials[product.dialColorAlt] ?? product.brand.color;
+    files.push([`${product.slug}.svg`, artwork(product.name, product.optionLabels[0] ?? product.brand.name, dial, { strap: product.strapType })]);
+    files.push([`${product.slug}-detail.svg`, artwork(product.name, product.optionLabels[1] ?? product.brand.name, dialAlt, { detail: true, strap: product.strapTypeAlt })]);
   }
   for (const brand of demoBrands) {
     const slug = slugify(brand.name);

@@ -59,7 +59,7 @@ async function seedCatalog(tx: DbTransaction, now: Date) {
     const [inserted] = await tx.insert(products).values({
       name: product.name, slug: product.slug, brandId: brandIds.get(slugify(product.brand.name))!,
       collectionName: product.collectionName,
-      description: `## ${product.name}\n\nA fictional ${product.style} watch from ${product.brand.name}: a ${product.caseSizeMm} mm case, ${product.movement} movement and a ${product.dialColor.toLowerCase()} dial. Sold as ${product.condition === "new" ? "new stock" : product.condition.replace("_", " ")}.\n\nThis fictional product demonstrates the catalog, grouped features and option selector. Watch artwork is an original generated placeholder, not a photograph of a commercial product.`,
+      description: `## ${product.name}\n\nA fictional ${product.brand.name} watch: a ${product.caseSizeMm} mm case and ${product.movement} movement. Sold as ${product.condition === "new" ? "new stock" : product.condition.replace("_", " ")}.\n\nThis fictional product demonstrates the catalog, grouped features and option selector. Watch artwork is an original generated placeholder, not a photograph of a commercial product.`,
       gender: product.gender, condition: product.condition, movement: product.movement,
       style: product.style, caseSizeMm: product.caseSizeMm, caseMaterial: product.caseMaterial,
       strapType: product.strapType, glass: product.glass, waterResistanceM: product.waterResistanceM,

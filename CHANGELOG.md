@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+**TickTrendFit: the template is now a watch store.** The data model, storefront,
+admin and seed data were rebuilt around watches while keeping the phone-first,
+free-to-run architecture. Brands carry `imported` / `master copy` / `first copy`
+/ `local`; products carry movement, case size and material, strap, glass, water
+resistance, dial colour, reference, warranty and condition; dial/strap options
+replace the earlier size-based variant shape; and the old note taxonomy became
+six grouped feature families (display, complications, durability, movement,
+case, strap) with new filter groups for movement, case size, material, strap,
+water resistance and condition. The product page gains a watch spec table and
+condition-aware structured data, and the demo catalog, artwork, copy, README,
+spec and deploy guides all describe fictional watch houses. Existing template
+identifiers were renamed (`ttf-*` storage keys and cookies, `TTF-` order
+numbers).
+
 **The storefront feels like an app on phones** (≤760 px; tablets and desktops
 are unchanged). A floating glass tab bar (Home, Shop, Search, Saved, Bag)
 replaces the header icons; its highlight glides between tabs and it slims down
@@ -40,15 +54,15 @@ script ever fails to load, the password can't end up in the URL.
 ## v0.3.0 (2026-09-27)
 
 **Product cards, rebuilt** in the admin panel's language: a grey panel with
-the photo and a white info plate. Cards now show concentration, size and how
-many sizes are on offer as tags, flag stock only when it's low or sold out,
-and have a quick-add button that puts the shown size in the bag (it widens to
-"Add 50 ml" on hover). The whole card is one link, so it's a single tab stop.
+the photo and a white info plate. Cards now show movement, case size and how
+many options are on offer as tags, flag stock only when it's low or sold out,
+and have a quick-add button that puts the shown option in the bag (it widens to
+"Add Black dial" on hover). The whole card is one link, so it's a single tab stop.
 
 **Navigation, rebuilt.** The desktop row is a grey rail whose highlight
 glides to the item under the pointer. "Shop" and "Brands" open full-width
 panels: ways to shop and collections as icon-tile rows with a featured
-collection, and every brand as a monogram tile beside its lead fragrance.
+collection, and every brand as a monogram tile beside its lead watch.
 Track order and Deals sit on the right. The phone menu follows the admin
 sidebar: labelled groups of icon-tile rows, brands as a tile grid, and a
 call/WhatsApp card at the bottom.
@@ -85,15 +99,15 @@ product-name GIN index is dropped (migration 0005).
 The first public release.
 
 **Storefront:** homepage with configurable sections, brand pages, collections,
-product listing with perfume-specific filters and live counts, search with
-suggestions, product pages with notes pyramid, size variants, gallery and
+product listing with watch-specific filters and live counts, search with
+suggestions, product pages with grouped features, dial/strap options, gallery and
 related products, bag and checkout (Cash on Delivery, manual bKash/Nagad with
 TrxID), order confirmation and tracking, wishlist, recently viewed, coupons,
 and verified-purchase reviews. Mobile-first from 360 px.
 
 **Admin:** order queue built around the confirmation call (status timeline,
 call log, notes, payment verification, courier details), products and
-variants with stock, brands, notes, collections, homepage sections, banners,
+variants with stock, brands, features, collections, homepage sections, banners,
 static pages, customers with blocking, coupons, review moderation, settings
 and diagnostics.
 

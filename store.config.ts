@@ -169,7 +169,7 @@ const config: StoreConfig = {
     social: {
       facebook: "https://facebook.com/example",
       instagram: null,
-      tiktok: null,
+      tiktok: "https://www.tiktok.com/@ticktrendfit",
       youtube: null,
     },
   },

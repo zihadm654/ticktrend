@@ -1,6 +1,6 @@
-# Attar
+# TickTrendFit
 
-Open-source perfume store template: a storefront plus admin panel for phone-confirmed orders in Bangladesh-style markets, deployable entirely on free tiers.
+Open-source watch store template: a storefront plus admin panel for phone-confirmed orders in Bangladesh-style markets, deployable entirely on free tiers.
 
 - `docs/SPEC.md` is the contract: data model (§4) and the ST-*, AD-* and PF-* tasks with acceptance criteria.
 - `CONTRIBUTING.md` has the commands, directory map and recipes. Follow the matching recipe when you rebrand, build admin UI, add a filter, homepage section, notification adapter or feature flag, change the schema, or touch coupons, reviews or the wishlist.
@@ -18,7 +18,7 @@ Open-source perfume store template: a storefront plus admin panel for phone-conf
 6. A feature flag in `store.config.ts` gates its UI, routes and queries completely.
 7. Store name, phone, currency, zones, payment methods and theme colours come from `store.config.ts`.
 8. Mobile first: target 360 px. Shoppers are on Android and admins run shops from phones.
-9. Seed data stays fictional, with no real perfume brands or photos (trademark risk in an OSS repo).
+9. Seed data stays fictional, with no real watch brands or photos (trademark risk in an OSS repo).
 10. Server Components by default; `"use client"` only where interaction demands it.
 11. Server Actions and routes parse every argument with Zod (`.max()` on strings and arrays) and rate-limit customer-data writes and lookups with `takeRateLimit`. Admin actions start with `await requireAdmin()`; `tests/admin.test.ts` enforces that and flags new `"use server"` modules.
 12. Logs carry no customer names, phones, addresses or request payloads; `logging.serverFunctions` stays off.

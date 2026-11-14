@@ -61,7 +61,7 @@ test("redacted order alerts omit customer contact details", async () => {
       shippingAddress: { line1: "12 Fixture Road", area: "Dhanmondi", city: "Dhaka", zone_id: "inside" },
       discount: 0, couponCode: null, deliveryFee: 6000, total: 256000, paymentMethod: "bkash", paymentTxnId: "TRX123",
     },
-    items: [{ quantity: 2, brandName: "Meral House", productName: "Rain", variantLabel: "50 ml", lineTotal: 250000 }],
+    items: [{ quantity: 2, brandName: "Meral House", productName: "Rain", variantLabel: "Black dial", lineTotal: 250000 }],
   } as unknown as Parameters<typeof orderNotificationText>[0];
   const full = orderNotificationText(notification, { redact: false });
   assert.match(full, /Fixture Buyer \| \+8801712345678/);

@@ -1,10 +1,15 @@
 # Phase 3 implementation and verification
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Implemented 20 September 2026. Scope is steps 3.1 through 3.6 of the implementation plan. Admin screens remain Phase 4; coupons remain Phase 5.
 
 ## Delivered
 
-- `attar-cart-v1` persistence, cross-tab updates, server quotes, live header count, drawer and cart page. Price changes, reduced stock and unavailable items produce visible messages.
+- `ttf-cart-v1` persistence, cross-tab updates, server quotes, live header count, drawer and cart page. Price changes, reduced stock and unavailable items produce visible messages.
 - Product-page add-to-bag controls, stock-capped quantities, removal, empty/loading/error states and configured free-delivery progress.
 - Guest checkout with shared Zod validation, normalized Bangladesh phone numbers, configured zones and enabled payment methods, manual-payment instructions and required TrxID.
 - Transactional customer upsert, blocked-customer check, database-priced item snapshots and initial pending event. A request UUID prevents duplicate orders on retry. Variant locks coordinate with confirmation; checkout never decrements stock.

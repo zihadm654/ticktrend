@@ -1,5 +1,10 @@
 # Phase 5 verification (2026-09-26)
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Merchandising & community: coupons (ST-18, AD-12), reviews (ST-17, AD-13),
 search autosuggest (ST-08), wishlist + recently viewed (ST-14), flag audit (§3.7).
 
@@ -55,7 +60,7 @@ console errors, and the suggest API answers.
 | `wishlist` | `/wishlist` → HTTP 404 (gated in `proxy.ts` as well as the page, because storefront pages stream a 200 before a page-level `notFound()`); no hearts on cards or the PDP; no header wishlist button; `loadSavedProducts("wishlist")` refuses |
 | `reviews` | no `#reviews` section, buy-box rating, card ratings or JSON-LD `aggregateRating`; `getProductReviews`/`getRatingsFor` return without querying; `submitReview` and the admin actions refuse; `/admin/reviews` → 404; nav entry and pending badge hidden; seed and verify-seed skip the table |
 | `coupons` | no coupon form or discount line in cart/checkout, even with a stale code in localStorage (the code is dropped); `revalidateCart` never queries coupons; `createOrder` ignores the code and rejects any claimed discount; `/admin/coupons` → 404; nav entry hidden |
-| `recentlyViewed` | no strip on the PDP, home or wishlist page; `attar-recent-v1` is never written; `loadSavedProducts("recent")` refuses |
+| `recentlyViewed` | no strip on the PDP, home or wishlist page; `ttf-recent-v1` is never written; `loadSavedProducts("recent")` refuses |
 | `dealBadges` | no `−%` badges and no struck-through MSRP on cards, the PDP or the search dropdown |
 
 With both `coupons` and `reviews` off, the "Marketing" nav group disappears.

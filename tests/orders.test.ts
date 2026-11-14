@@ -41,7 +41,7 @@ async function pending(lines: { id: string | null; quantity: number }[]) {
     const subtotal = lines.reduce((sum, item) => sum + item.quantity * 100, 0);
     const zone = storeConfig.checkout.deliveryZones[0];
     const [row] = await tx.insert(orders).values({ orderNumber: await numbering.nextOrderNumber(tx), customerId: "test-customer", customerName: "Fixture Customer", customerPhone: "+8801712345678", shippingAddress: { line1: "Fixture Road", area: "Test", city: "Dhaka", zone_id: zone.id }, deliveryZoneId: zone.id, deliveryFee: zone.fee, subtotal, total: subtotal + zone.fee, paymentMethod: "cod" }).returning();
-    if (lines.length) await tx.insert(orderItems).values(lines.map((item) => ({ orderId: row.id, variantId: item.id, productName: "Frozen product", variantLabel: "50 ml", brandName: "Frozen brand", unitPrice: 100, quantity: item.quantity, lineTotal: item.quantity * 100 })));
+    if (lines.length) await tx.insert(orderItems).values(lines.map((item) => ({ orderId: row.id, variantId: item.id, productName: "Frozen product", variantLabel: "Black dial", brandName: "Frozen brand", unitPrice: 100, quantity: item.quantity, lineTotal: item.quantity * 100 })));
     await tx.insert(orderEvents).values({ orderId: row.id, type: "system", toStatus: "pending", message: "Order placed.", actor: "system" });
     return row;
   });

@@ -1,6 +1,6 @@
-# Attar
+# TickTrendFit
 
-**An open-source perfume shop you can run for ৳0.** A deal-driven storefront
+**An open-source watch shop you can run for ৳0.** A deal-driven storefront
 modelled on Jomashop, plus a full admin panel, built for shops that confirm
 orders by phone and take Cash on Delivery, bKash or Nagad instead of card
 payments.
@@ -8,24 +8,28 @@ payments.
 Built for Bangladesh first, configurable for any market: currency, delivery
 zones and payment methods all live in one config file.
 
-[![CI](https://github.com/nadidazwad/nextjs-perfume-store/actions/workflows/ci.yml/badge.svg)](https://github.com/nadidazwad/nextjs-perfume-store/actions/workflows/ci.yml)
+[![CI](https://github.com/zihadm654/ticktrend/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/ticktrendfit/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**[Live demo →](https://nextjs-perfume-store.vercel.app)** (fictional store) ·
-**[Try the admin →](https://nextjs-perfume-store.vercel.app/demo)**: one click gives you a
+Deploy your own copy to get a public demo: set `DEMO_MODE` and every visitor gets a
 private copy of the store for 2 hours. Edit products, confirm and ship orders, rearrange the
 homepage and place orders; nobody else sees your changes.
 
 ![Storefront home page](docs/screenshots/storefront/home.webp)
 
+> [!NOTE]
+> The screenshots in this README and in `docs/SCREENSHOTS.md` were captured from
+> the template's earlier demo catalog. The layout is current; the merchandise is
+> not. Run `pnpm dev` after seeding to see the watch catalog.
+
 ## What you get
 
 **Storefront** (no customer accounts; customers are identified by phone number)
 - Brand-first navigation, strikethrough prices and deal badges, and filters
-  built for perfume: notes, concentration, gender, size, tester or gift set,
-  brand type
-- Product pages with a notes pyramid, size variants, gallery, related
-  products, and (optional) verified-purchase reviews
+  built for watches: movement, case size, brand type, condition, case
+  material, strap, water resistance and grouped features
+- Product pages with grouped feature chips, dial/strap options, a spec table,
+  gallery, related watches, and (optional) verified-purchase reviews
 - A checkout that asks only for name, phone and address, with COD or manual
   bKash/Nagad (the customer enters the TrxID)
 - Order tracking by order number + phone, wishlist, recently viewed,
@@ -36,16 +40,16 @@ homepage and place orders; nobody else sees your changes.
 **Admin** (`/admin`)
 - An order queue built around the confirmation call: status timeline, call
   log, notes, payment verification, courier and tracking details
-- Products with variants and stock, brands, notes, collections, homepage
-  sections, banners, static pages, customers (with a block switch for fake
-  orders), coupons, review moderation
+- Products with dial/strap options and stock, brands, feature taxonomy,
+  collections, homepage sections, banners, static pages, customers (with a
+  block switch for fake orders), coupons, review moderation
 - New-order alerts on Telegram or email
 
 ## Screenshots
 
 <table>
 <tr>
-<td width="50%"><img src="docs/screenshots/storefront/listing.webp" alt="Product listing with filters"><br><sub>Listing with perfume filters and live counts</sub></td>
+<td width="50%"><img src="docs/screenshots/storefront/listing.webp" alt="Product listing with filters"><br><sub>Listing with watch filters and live counts</sub></td>
 <td width="50%"><img src="docs/screenshots/storefront/product.webp" alt="Product page"><br><sub>Product page</sub></td>
 </tr>
 <tr>
@@ -77,7 +81,7 @@ You need [Node.js](https://nodejs.org) 22 or newer and pnpm (`corepack enable`
 installs it).
 
 ```bash
-git clone https://github.com/nadidazwad/nextjs-perfume-store.git my-store && cd my-store
+git clone https://github.com/zihadm654/ticktrend.git my-store && cd my-store
 pnpm install
 pnpm db:migrate   # creates the built-in local database in .data/
 pnpm db:seed      # demo catalog, orders and an admin account
@@ -87,7 +91,7 @@ pnpm dev
 - Storefront: http://localhost:3000
 - Admin: http://localhost:3000/admin with `admin@example.com` / `admin1234`
 
-No `.env` file is needed. Locally, Attar uses an embedded Postgres (PGlite),
+No `.env` file is needed. Locally, TickTrendFit uses an embedded Postgres (PGlite),
 prints order alerts to the terminal, and saves uploaded images to disk.
 
 ## Make it yours
@@ -115,10 +119,10 @@ expiring admin sandbox (`DEMO_MODE`; never on a real store).
 
 > [!WARNING]
 > Vercel's free Hobby plan is licensed for **non-commercial use only**. Use it
-> to try Attar. For a store taking real orders, upgrade to Vercel Pro or
+> to try TickTrendFit. For a store taking real orders, upgrade to Vercel Pro or
 > self-host with Docker.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fnadidazwad%2Fnextjs-perfume-store&env=DATABASE_URL,BETTER_AUTH_SECRET,NEXT_PUBLIC_APP_URL,ADMIN_EMAIL,ADMIN_PASSWORD&envDescription=Database%20URL%20from%20Neon%2C%20a%20random%20secret%2C%20your%20store%20URL%20and%20your%20admin%20login&envLink=https%3A%2F%2Fgithub.com%2Fnadidazwad%2Fnextjs-perfume-store%2Fblob%2Fmain%2Fdocs%2Fdeploy%2Fvercel-neon.md)
+Run your own copy: fork this repository, then use the deploy guides below.
 
 Optional services, all with free tiers:
 

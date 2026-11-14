@@ -33,7 +33,7 @@ test("Bangladesh phone normalization rejects invalid prefixes and lengths", () =
   }
 });
 test("slugs and random IDs are URL safe", () => {
-  assert.equal(slugify("  Café & Amber / 100 ml  "), "cafe-amber-100-ml");
+  assert.equal(slugify("  Cinder Meridian / 41 mm  "), "cinder-meridian-41-mm");
   assert.throws(() => slugify(" / "));
   const ids = Array.from({ length: 1000 }, createId);
   assert.equal(new Set(ids).size, ids.length);

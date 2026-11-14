@@ -22,8 +22,8 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_PASSWORD: attar
-          POSTGRES_DB: attar
+          POSTGRES_PASSWORD: ttf
+          POSTGRES_DB: ttf
         ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
@@ -39,7 +39,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
         env:
-          TEST_POSTGRES_URL: postgres://postgres:attar@localhost:5432/attar
+          TEST_POSTGRES_URL: postgres://postgres:ttf@localhost:5432/ttf
       # No .env and no database: the build must work for anyone who forks.
       - run: pnpm build
       # Zero-account path on the embedded database: migrate, seed, then seed
@@ -57,5 +57,5 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - run: docker build --tag attar:ci .
-      - run: docker build --tag attar-tools:ci --target tools .
+      - run: docker build --tag ticktrendfit:ci .
+      - run: docker build --tag ticktrendfit-tools:ci --target tools .

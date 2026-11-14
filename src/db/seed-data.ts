@@ -58,6 +58,25 @@ const strapLabel: Record<(typeof strapTypes)[number], string> = {
   steel: "Steel", leather: "Leather", mesh: "Mesh", rubber: "Rubber", silicone: "Silicone", fabric: "Fabric",
 };
 
+/** Names that promise a movement or a wearing style should not be contradicted by the generated data. */
+function movementFor(name: string, index: number) {
+  const lower = name.toLowerCase();
+  if (lower.includes("automatic")) return "automatic";
+  if (lower.includes("quartz")) return "quartz";
+  if (lower.includes("solar")) return "solar";
+  if (lower.includes("smart")) return "smart";
+  if (lower.includes("digital")) return "digital";
+  if (/dress|slim|minimal|moon|marina/.test(lower)) return "quartz";
+  return movements[index % movements.length];
+}
+function styleFor(name: string, index: number) {
+  const lower = name.toLowerCase();
+  if (lower.includes("digital") || lower.includes("smart")) return "digital";
+  if (/diver|field|trek|pilot|chrono|gmt/.test(lower)) return "sport";
+  if (/dress|slim|minimal|moon/.test(lower)) return "dress";
+  return styles[index % 3];
+}
+
 export const demoProducts = productNames.map((name, index) => {
   const brand = demoBrands[Math.floor(index / 4)];
   const dialColor = dials[index % dials.length];
@@ -71,14 +90,16 @@ export const demoProducts = productNames.map((name, index) => {
   return {
     name, slug: slugify(name), brand, index,
     gender: genders[index % genders.length],
-    movement: movements[index % movements.length] as typeof products.$inferInsert.movement,
-    style: styles[index % styles.length],
+    movement: movementFor(name, index) as typeof products.$inferInsert.movement,
+    style: styleFor(name, index),
     caseSizeMm: caseSizes[index % caseSizes.length],
     caseMaterial: caseMaterials[index % caseMaterials.length] as typeof products.$inferSelect.caseMaterial,
     strapType: strapTypes[index % strapTypes.length] as typeof products.$inferSelect.strapType,
     glass: glassTypes[index % glassTypes.length],
     waterResistanceM: waterResistance[index % waterResistance.length],
     dialColor,
+    dialColorAlt: alternativeDial,
+    strapTypeAlt: alternativeStrap as typeof products.$inferSelect.strapType,
     referenceNo: `TTF-${String(index + 1).padStart(3, "0")}-${movements[index % movements.length].slice(0, 2).toUpperCase()}`,
     warrantyMonths: [0, 6, 12, 24][index % 4],
     condition: conditions[index % conditions.length] as typeof products.$inferSelect.condition,
@@ -105,6 +126,8 @@ export const demoProducts = productNames.map((name, index) => {
     glass: string;
     waterResistanceM: number;
     dialColor: string;
+    dialColorAlt: string;
+    strapTypeAlt: typeof products.$inferSelect.strapType;
     referenceNo: string;
     warrantyMonths: number;
     condition: typeof products.$inferSelect.condition;

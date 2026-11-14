@@ -10,8 +10,7 @@ and storefront only. Everyone else keeps seeing the original demo.
 > takes real orders. It lets strangers into the admin and blocks orders from
 > anyone without a sandbox.
 
-This is how [the project's live demo](https://nextjs-perfume-store.vercel.app)
-runs. Start from a normal [Vercel + Neon deployment](vercel-neon.md) with the
+This is how a showcase deployment runs. Start from a normal [Vercel + Neon deployment](vercel-neon.md) with the
 demo data seeded.
 
 ## How it works
@@ -19,7 +18,7 @@ demo data seeded.
 - Each visitor sandbox is a Postgres schema, `demo_<id>`, holding a copy of
   every store table (products, orders, homepage, settings…), made from
   `public` in one transaction (about 350 ms next to the database).
-- Requests from a visitor carry a signed `attar_sandbox` cookie bound to their
+- Requests from a visitor carry a signed `ttf_sandbox` cookie bound to their
   admin session. `db` sends those requests to a small connection whose
   `search_path` is that schema alone. Admin logins, sessions and rate limits
   always stay in `public`.

@@ -242,7 +242,7 @@ export function SwitchField({
     </label>
   );
 }
-/** Pill-shaped radio group, e.g. gender / concentration. */
+/** Pill-shaped radio group, e.g. gender / movement. */
 export function ChipChoice<T extends string>({
   label,
   value,

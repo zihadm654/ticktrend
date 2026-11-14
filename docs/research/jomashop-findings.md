@@ -1,5 +1,10 @@
 # Jomashop UX Research Notes
 
+> [!NOTE]
+> Pre-rebrand research. These field notes prompted the original storefront spec;
+> the patterns were later adapted to watches. Fragrance-specific observations
+> are kept for reference.
+
 > Field notes from inspecting jomashop.com (homepage, `/fragrances.html` PLP, and a
 > Creed Aventus PDP) on 2026-09-16. These findings drive the storefront spec in
 > `docs/SPEC.md`. Where Jomashop's pattern doesn't fit a manual-payment Bangladesh

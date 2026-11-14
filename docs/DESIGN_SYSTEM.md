@@ -1,6 +1,6 @@
 # Design system
 
-Attar's storefront and admin panel share one visual language: a white canvas,
+TickTrendFit's storefront and admin panel share one visual language: a white canvas,
 soft grey rounded panels, white fields, pill buttons and small icon tiles.
 Colour is reserved for the brand accent and for state (stock, order status,
 deals), and state colour always comes with a text label.
@@ -33,7 +33,7 @@ ask it not to hardcode colours that belong in `store.config.ts`.
 |---|---|
 | `.button` + `primary` / `ghost` / `light` / `sm` / `lg` / `icon` | Every button and button-like link |
 | `.icon-button` (+ `.count`) | Round header/utility icons |
-| `.chip`, `.chip.link`, `.chip.removable` | Tags, note links, active filters |
+| `.chip`, `.chip.link`, `.chip.removable` | Tags, feature links, active filters |
 | `.badge`, `.badge.deal` | Image overlays (discount, sold out) |
 | `.panel`, `.icon-tile` | Grey content panels, icon squares |
 | `.switch`, `.checkbox`, `.input-affix`, `.search-form` | Form controls |
@@ -46,7 +46,7 @@ ask it not to hardcode colours that belong in `store.config.ts`.
 | `CountBadge` (`storefront/count-badge.tsx`) | Header count bubble; pops when the count goes up from a shopper action, not on hydration |
 | `SuccessMark` (`storefront/ui.tsx`) | Self-drawing tick for rare "it worked" moments (order placed, review sent) |
 | `ProductCard` | Every product tile (home carousels, listings, related, wishlist, recently viewed). A grey panel holding the photo and a white info plate; the name link stretches over the card, the heart and `QuickAdd` sit above it. Stock is only flagged (`.stock-flag`) when it's low or gone |
-| `QuickAdd` (`storefront/quick-add.tsx`) | Card shortcut that adds the shown size; a round button that widens to "Add 50 ml" on hover/focus |
+| `QuickAdd` (`storefront/quick-add.tsx`) | Card shortcut that adds the shown option; a round button that widens to "Add Black dial" on hover/focus |
 | Header nav (`storefront/nav.tsx`) | `DesktopNavigation` (grey rail, gliding highlight), `BrandMenu`, `MobileMenu`; the Shop panel is server-rendered in `shell.tsx`. Mega panels are `.nav-panel` > `.nav-card` > `.nav-row` (icon tile + label + hint) |
 
 ## Phone app shell
@@ -87,7 +87,7 @@ the tab bar or the home indicator (`env(safe-area-inset-*)`).
 - `components/admin/fields.tsx`: `ImageField` (drop zone, WebP upload),
   `MarkdownField` (write/preview), `SwitchField`, `ChipChoice`, `ChipMulti`,
   `ConfirmButton` (styled delete confirmation), `useUnsavedGuard`.
-- `components/admin/combobox.tsx`: type-to-filter picker (brands, notes).
+- `components/admin/combobox.tsx`: type-to-filter picker (brands, features).
 - Coupons & reviews (`=== COUPONS & REVIEWS` in `admin.css`): `.admin-uses` +
   `.admin-meter` (used / max bar), `.admin-stars`, `.admin-review` rows with a
   `.admin-bulkbar` for bulk approve / reject / delete.

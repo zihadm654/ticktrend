@@ -1,20 +1,20 @@
-# Self-hosted Attar: Postgres + one-off setup (migrate, seed) + the web server.
+# Self-hosted TickTrendFit: Postgres + one-off setup (migrate, seed) + the web server.
 # Copy .env.example to .env and set at least BETTER_AUTH_SECRET, ADMIN_EMAIL,
 # ADMIN_PASSWORD, NEXT_PUBLIC_APP_URL and POSTGRES_PASSWORD. See docs/deploy/docker.md.
-x-database-url: &database-url postgres://attar:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/attar
+x-database-url: &database-url postgres://ttf:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/ttf
 
 services:
   db:
     image: docker.io/library/postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: attar
-      POSTGRES_DB: attar
+      POSTGRES_USER: ttf
+      POSTGRES_DB: ttf
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U attar -d attar"]
+      test: ["CMD-SHELL", "pg_isready -U ttf -d ttf"]
       interval: 3s
       retries: 20
 

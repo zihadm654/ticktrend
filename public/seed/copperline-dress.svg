@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="960" viewBox="0 0 800 960" role="img" aria-labelledby="title desc">
-  <title id="title">Copperline Dress</title><desc id="desc">Meghvara. Original illustration of a fictional wristwatch.</desc>
+  <title id="title">Copperline Dress</title><desc id="desc">Black dial · Fabric strap. Original illustration of a fictional wristwatch.</desc>
   <defs>
     <linearGradient id="bg" x2=".8" y2="1"><stop stop-color="#f2f3f2"/><stop offset="1" stop-color="#dfe1e0"/></linearGradient>
     <linearGradient id="band" x1="0" x2="1"><stop stop-color="#5b6151"/><stop offset=".5" stop-color="#828a76"/><stop offset="1" stop-color="#5b6151"/></linearGradient>
@@ -15,13 +15,13 @@
     <line x1="450" y1="54.8" x2="450" y2="905.1999999999999" stroke="#fff" stroke-opacity=".22" stroke-width="2" stroke-dasharray="7 9"/>
     <rect x="576" y="476" width="24" height="44" rx="8" fill="url(#metal)" stroke="#9ba2a9" stroke-width="1.5"/>
     <rect x="230" y="342" width="340" height="312" rx="96" fill="url(#metal)" stroke="#b9bfc6" stroke-width="2"/>
-  <rect x="252" y="360" width="296" height="276" rx="80" fill="#496b61"/>
+  <rect x="252" y="360" width="296" height="276" rx="80" fill="#23262b"/>
   <rect x="252" y="360" width="296" height="276" rx="80" fill="none" stroke="#f4f0e6" stroke-opacity=".35" stroke-width="2"/>
     <line x1="400.00" y1="376.00" x2="400.00" y2="362.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="461.00" y1="392.34" x2="468.00" y2="380.22" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="505.66" y1="437.00" x2="517.78" y2="430.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="522.00" y1="498.00" x2="536.00" y2="498.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="505.66" y1="559.00" x2="517.78" y2="566.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="461.00" y1="603.66" x2="468.00" y2="615.78" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="400.00" y1="620.00" x2="400.00" y2="634.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="339.00" y1="603.66" x2="332.00" y2="615.78" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="294.34" y1="559.00" x2="282.22" y2="566.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="278.00" y1="498.00" x2="264.00" y2="498.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="7" stroke-linecap="round"/><line x1="294.34" y1="437.00" x2="282.22" y2="430.00" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/><line x1="339.00" y1="392.34" x2="332.00" y2="380.22" stroke="#efeadd" stroke-opacity=".85" stroke-width="4" stroke-linecap="round"/>
     <line x1="400" y1="498" x2="341.02" y2="456.70" stroke="#f7f4ec" stroke-width="11" stroke-linecap="round"/>
     <line x1="400" y1="498" x2="483.14" y2="450.00" stroke="#f7f4ec" stroke-width="7" stroke-linecap="round"/>
     <circle cx="400" cy="498" r="10" fill="#f7f4ec"/>
-    <circle cx="400" cy="498" r="4" fill="#496b61"/>
+    <circle cx="400" cy="498" r="4" fill="#23262b"/>
     <rect x="486" y="476" width="44" height="34" rx="5" fill="#f7f4ec"/>
     <text x="508" y="501" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#3a3f45">19</text>
   </g>

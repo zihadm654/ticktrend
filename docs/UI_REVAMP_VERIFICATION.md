@@ -1,9 +1,14 @@
 # Storefront UI revamp
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Verified 17 September 2026 against the existing seeded catalog.
 
 The storefront now uses warm neutral surfaces, a config-driven olive accent,
-a split campaign hero, original fictional fragrance artwork, typographic brand
+a split campaign hero, original fictional product artwork, typographic brand
 marks, quieter price badges, and a consistent product presentation across
 homepage carousels, listings and detail pages. Category navigation links open
 collections directly; the Brands menu retains its disclosure. Existing mobile
@@ -53,7 +58,7 @@ overflow, absent underline pseudo-elements, and wishlist save/remove states.
 ## Navigation and product-card refinement — 2026-09-17
 
 - Desktop navigation now uses a prominent catalog entry, 16px links, and an expanded brand directory with larger names and two featured images. Mobile drawer markup and behavior are preserved.
-- Product cards use larger names and prices, distinct concentration/size rows, and an unobtrusive link reveal on pointer hover or keyboard focus. Alternate-image previews remain.
+- Product cards use larger names and prices, distinct spec rows, and an unobtrusive link reveal on pointer hover or keyboard focus. Alternate-image previews remain.
 - Brand panel entry takes 180ms for pointer input. Keyboard and reduced-motion handling remain in place. No animated underlines were added.
 - Browser checked at 1440px, 900px and 360px. No overflow at desktop or 360px; mobile menu selection closes the drawer and navigates. Escape closes the desktop panel and returns focus to its summary. Keyboard focus reveals the product affordance.
 - Lint, typecheck, production build and two consecutive seed runs passed before the final loading-image aspect-ratio alignment. Final build rechecked after that CSS adjustment.

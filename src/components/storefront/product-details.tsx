@@ -163,7 +163,7 @@ export function ProductBuyBox({
               </span>
             </>
           ) : (
-            <span className="muted">No reviews yet · Write the first</span>
+            <span className="muted">No reviews yet · Write the first review</span>
           )}
         </a>
       )}

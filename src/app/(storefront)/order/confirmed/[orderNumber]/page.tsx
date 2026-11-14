@@ -18,7 +18,7 @@ export default async function Page({
   params: Promise<{ orderNumber: string }>;
 }) {
   const { orderNumber } = await params;
-  const token = (await cookies()).get("attar-order")?.value;
+  const token = (await cookies()).get("ttf-order")?.value;
   const [record] = token
     ? await db
         .select()

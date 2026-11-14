@@ -6,7 +6,7 @@ Vercel builds and serves the app.
 
 > [!WARNING]
 > **Vercel's free Hobby plan is for non-commercial use only.** It's fine for
-> trying Attar, a demo, or a store you're still setting up. Once you take real
+> trying TickTrendFit, a demo, or a store you're still setting up. Once you take real
 > orders as a business, move to Vercel Pro or self-host with
 > [Docker](docker.md), which can also cost ৳0 on a free VM.
 

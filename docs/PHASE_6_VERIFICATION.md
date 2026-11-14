@@ -1,5 +1,10 @@
 # Phase 6 verification (2026-09-27)
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Open-source release: security audit (6.1, PF-09), performance (6.2),
 README and deploy guides (6.3, PF-08), AGENTS.md sync (6.4), CI and community
 files (6.5). Release (6.6) is prepared locally and waits on the maintainer:
@@ -96,10 +101,10 @@ every query over 20 ms. Server response time is the median of 5 requests:
 | URL | Before | After |
 |---|---|---|
 | `/products` | 735 ms | 166 ms |
-| `/products?note=oud` | 525 ms | 147 ms |
-| `/products?size=100-plus&deal=1` | 414 ms | 102 ms |
+| `/products?movement=automatic` | 525 ms | 147 ms |
+| `/products?size=41-44&deal=1` | 414 ms | 102 ms |
 | `/c/deals` | 741 ms | 189 ms |
-| `/search?q=oud` | 351 ms | 117 ms |
+| `/search?q=watch` | 351 ms | 117 ms |
 | PDP | 257 ms | 81 ms |
 | `/brands`, suggest API | 79 ms, 86 ms | 81 ms, 75 ms |
 
@@ -189,7 +194,7 @@ deploy guide), schema change (generate + migrate).
   fixed above.
 - `.github/dependabot.yml` (npm grouped weekly, GitHub Actions weekly), issue
   forms (bug, feature), PR template.
-- `LICENSE` (MIT, "Attar contributors"), `CONTRIBUTING.md`, `SECURITY.md`
+- `LICENSE` (MIT, "TickTrendFit contributors"), `CONTRIBUTING.md`, `SECURITY.md`
   (private vulnerability reporting), `CHANGELOG.md`.
 - Pre-release scan: no secret-shaped strings, no stray large files; `.data/`,
   `.env*`, `.next/`, build info and `next-env.d.ts` are ignored.
@@ -229,8 +234,8 @@ Everything above is local; nothing has been initialised, pushed, tagged or
 deployed.
 
 1. ~~Choose the GitHub owner and repository name~~: done,
-   `nadidazwad/nextjs-perfume-store`; placeholders replaced.
-2. Optionally put a name in `LICENSE` instead of "Attar contributors".
+   `your-org/ticktrendfit`; placeholders replaced.
+2. Optionally put a name in `LICENSE` instead of "TickTrendFit contributors".
 3. ~~`git init`, first commit, create the GitHub repository, push `main`~~:
    done; topics added.
 4. ~~Enable **Private vulnerability reporting**~~: done.
@@ -243,7 +248,7 @@ deployed.
 
 ## Public demo (2026-09-27)
 
-`https://nextjs-perfume-store.vercel.app`: Vercel Hobby (non-commercial
+`https://your-demo.example.com`: Vercel Hobby (non-commercial
 showcase) + Neon free plan. First deployed in AWS US East 1 next to
 Vercel's default `iad1`, then moved to Singapore for the Bangladesh
 audience: function region `sin1` + a new Neon project in

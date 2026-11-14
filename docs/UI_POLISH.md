@@ -1,5 +1,10 @@
 # Storefront polish — 17 September 2026
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Implemented before Phase 3 under the user's approval. Uses better-ui,
 find-animation-opportunities, improve-animations, and emil-design-eng. Retains
 the Scandinavian direction and existing fictional artwork. No new dependencies

@@ -1,9 +1,14 @@
 # Phase 7 verification (2026-09-27)
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Public demo with a sandboxed admin, behind `DEMO_MODE`. Visitors click **Try
 the admin** on the live demo, get a private copy of the store for 2 hours,
 and use the real admin on it. Live at
-`https://nextjs-perfume-store.vercel.app/demo` since 2026-09-27.
+`https://your-demo.example.com/demo` since 2026-09-27.
 
 Decisions (maintainer, at the start): self-serve one-click access with the
 generated login shown to the visitor; 2-hour TTL, 50 live sandboxes; the
@@ -86,7 +91,7 @@ to the sandbox `search_path` fails the fail-closed test.
 
 - `db` wraps a small router client under Drizzle. Each query and
   transaction reads the request's cookies (`next/headers`). If there is an
-  HMAC-signed `attar_sandbox` cookie, it's bound to the current admin session
+  HMAC-signed `ttf_sandbox` cookie, it's bound to the current admin session
   cookie, and the sandbox is still in the registry (cached 5 s per instance),
   the query runs on that sandbox's connection. Otherwise it runs on the shared
   client. Scripts and migrations have no request and always use the shared
@@ -249,6 +254,6 @@ wrong-secret and garbage cookies fall back to the shared client.
    chat). Update `DATABASE_URL` (pooled) **and** `DATABASE_URL_DIRECT` (the
    same URL without `-pooler`) in Vercel before redeploying: the old password
    stops working the moment you rotate.
-2. **Revoke the Vercel token** (`~/.vercel-attar-token`).
+2. **Revoke the Vercel token** (`~/.vercel-ttf-token`).
 3. Optionally check Vercel → Cron Jobs after 21:30 UTC for the first
    scheduled cleanup; the test sandboxes still live expire on their own.

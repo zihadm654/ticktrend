@@ -2,6 +2,12 @@
 
 Every screen of the demo store, captured from a production build with the demo seed. The data and brands are fictional.
 
+> [!NOTE]
+> These captures predate the watch rebrand: they show the template's layout
+> with its earlier demo catalog. Layout, navigation and admin screens are still
+> representative; the merchandise, filter names and product fields are not. Run
+> the app locally after `pnpm db:seed` to see the watch catalog.
+
 ## Storefront
 
 ### Home
@@ -9,7 +15,7 @@ Every screen of the demo store, captured from a production build with the demo s
 ![Home page](screenshots/storefront/home.webp)
 
 <table><tr>
-<td width="50%"><img src="screenshots/storefront/home-sections.webp" alt="Product carousel: cards with stock, sizes and quick add"><br><sub>Product cards: stock, sizes and quick add</sub></td>
+<td width="50%"><img src="screenshots/storefront/home-sections.webp" alt="Product carousel: cards with stock, options and quick add"><br><sub>Product cards: stock, options and quick add</sub></td>
 <td width="50%"><img src="screenshots/storefront/search-suggest.webp" alt="Search suggestions as you type"><br><sub>Search suggestions as you type</sub></td>
 </tr></table>
 
@@ -17,7 +23,7 @@ Every screen of the demo store, captured from a production build with the demo s
 
 <table><tr>
 <td width="50%"><img src="screenshots/storefront/menu-shop.webp" alt="Shop menu: ways to shop, collections and a featured collection"><br><sub>Shop menu: ways to shop, collections, featured collection</sub></td>
-<td width="50%"><img src="screenshots/storefront/menu-brands.webp" alt="Brands menu with a lead fragrance per brand"><br><sub>Brands menu with a lead fragrance per brand</sub></td>
+<td width="50%"><img src="screenshots/storefront/menu-brands.webp" alt="Brands menu with a lead watch per brand"><br><sub>Brands menu with a lead watch per brand</sub></td>
 </tr></table>
 
 ### Catalog
@@ -30,8 +36,8 @@ Every screen of the demo store, captured from a production build with the demo s
 ### Product
 
 <table><tr>
-<td width="50%"><img src="screenshots/storefront/product.webp" alt="Product page: gallery, sizes, price and delivery"><br><sub>Product page: gallery, sizes, price and delivery</sub></td>
-<td width="50%"><img src="screenshots/storefront/product-notes.webp" alt="Notes pyramid and details"><br><sub>Notes pyramid and details</sub></td>
+<td width="50%"><img src="screenshots/storefront/product.webp" alt="Product page: gallery, options, price and delivery"><br><sub>Product page: gallery, options, price and delivery</sub></td>
+<td width="50%"><img src="screenshots/storefront/product-details.webp" alt="Grouped features and details"><br><sub>Grouped features and details</sub></td>
 </tr></table>
 
 ### Ordering
@@ -74,12 +80,12 @@ Every screen of the demo store, captured from a production build with the demo s
 
 <table><tr>
 <td width="50%"><img src="screenshots/admin/products.webp" alt="Products with stock at a glance"><br><sub>Products with stock at a glance</sub></td>
-<td width="50%"><img src="screenshots/admin/product-editor.webp" alt="Product editor: basics, variants, images, notes"><br><sub>Product editor: basics, variants, images, notes</sub></td>
+<td width="50%"><img src="screenshots/admin/product-editor.webp" alt="Product editor: basics, variants, images, features"><br><sub>Product editor: basics, variants, images, features</sub></td>
 </tr></table>
 
 <table><tr>
 <td width="50%"><img src="screenshots/admin/brands.webp" alt="Brands"><br><sub>Brands</sub></td>
-<td width="50%"><img src="screenshots/admin/taxonomy.webp" alt="Notes and collections"><br><sub>Notes and collections</sub></td>
+<td width="50%"><img src="screenshots/admin/taxonomy.webp" alt="Features and collections"><br><sub>Features and collections</sub></td>
 </tr></table>
 
 ### Storefront content

@@ -2005,7 +2005,7 @@ body:has(.store-header) [data-slot="dialog-overlay"]:is([data-starting-style], [
   background: rgb(255 255 255 / 92%);
   box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
 }
-/* Quick add: a 40px circle that widens into "Add 50 ml". clip-path, not width,
+/* Quick add: a 40px circle that widens into "Add Black dial". clip-path, not width,
    so nothing reflows; the hit area follows the clip. */
 .quick-add {
   --size: 40px;

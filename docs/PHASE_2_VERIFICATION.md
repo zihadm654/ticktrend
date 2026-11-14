@@ -1,5 +1,10 @@
 # Phase 2 verification
 
+> [!NOTE]
+> Historical record: written before the template became the TickTrendFit watch
+> store. The findings still describe the architecture, but catalog examples and
+> screenshots refer to the old demo data.
+
 Verified 17 September 2026. Phase 2 implements the read-only storefront; cart,
 checkout, admin editing, reviews, autosuggest and the full wishlist page retain
 their later-phase boundaries. Add to bag is disabled with the Phase 3 tooltip.

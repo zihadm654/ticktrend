@@ -1,6 +1,6 @@
-# Contributing to Attar
+# Contributing to TickTrendFit
 
-Thanks for helping. Attar is a template that small shops fork and run
+Thanks for helping. TickTrendFit is a template that small shops fork and run
 themselves, so changes should keep it simple to deploy, free to run, and easy
 to rebrand.
 
@@ -115,7 +115,7 @@ src/
     storefront/              storefront components (product-card, listing…);
                              ui.tsx = Breadcrumbs, SectionHead, Stars
                              nav.tsx  header rail, mega menus, phone menu
-                             quick-add.tsx  card "add this size" button
+                             quick-add.tsx  card "add this option" button
                              app-shell.tsx  phone tab bar, back button,
                              collapsing title, added-to-bag toast
                              sheet-drag.tsx drag-to-dismiss bottom sheets
@@ -213,11 +213,11 @@ release) and `docs/PHASE_7_VERIFICATION.md` (public demo with sandboxed admin).
   sends the code *and* the discount it displayed; a mismatch aborts the order.
   Free delivery is measured on the subtotal after the discount.
 - **Reviews**: guests submit via `submitReview` (lands `pending`). "Verified
-  purchase" = the phone has a *delivered* order containing any size of the
+  purchase" = the phone has a *delivered* order containing any option of the
   product (`hasDeliveredPurchase`), re-checked when an admin approves.
   Phones are never shown on the storefront.
-- **Wishlist / recently viewed**: IDs only, in localStorage (`attar-wishlist-v1`,
-  `attar-recent-v1`) via `saved-products.ts`; cards are fetched with the
+- **Wishlist / recently viewed**: IDs only, in localStorage (`ttf-wishlist-v1`,
+  `ttf-recent-v1`) via `saved-products.ts`; cards are fetched with the
   `loadSavedProducts` Server Action, which refuses when the flag is off and
   lets the client prune IDs whose products disappeared.
 - **Add a feature flag**: add it to `features` in `store.config.ts`, then gate

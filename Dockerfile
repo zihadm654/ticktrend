@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# Attar production image. See docs/deploy/docker.md.
-#   docker build -t attar .                  → the web server (default target)
-#   docker build -t attar-tools --target tools .  → migrations + seed runner
+# TickTrendFit production image. See docs/deploy/docker.md.
+#   docker build -t ticktrendfit .                  → the web server (default target)
+#   docker build -t ticktrendfit-tools --target tools .  → migrations + seed runner
 FROM node:24-slim AS base
 ENV NEXT_TELEMETRY_DISABLED=1 PNPM_HOME=/pnpm PATH=/pnpm:$PATH
 RUN corepack enable
@@ -24,11 +24,11 @@ CMD ["sh", "-c", "pnpm db:migrate && pnpm db:seed"]
 FROM node:24-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
-RUN useradd --system --uid 1001 attar && mkdir -p .data/uploads && chown -R attar .data
-COPY --from=build --chown=attar /app/.next/standalone ./
-COPY --from=build --chown=attar /app/.next/static ./.next/static
-COPY --from=build --chown=attar /app/public ./public
-USER attar
+RUN useradd --system --uid 1001 ttf && mkdir -p .data/uploads && chown -R ttf .data
+COPY --from=build --chown=ttf /app/.next/standalone ./
+COPY --from=build --chown=ttf /app/.next/static ./.next/static
+COPY --from=build --chown=ttf /app/public ./public
+USER ttf
 EXPOSE 3000
 # Uploaded product images (STORAGE_ADAPTER=local) live here; mount a volume to keep them.
 VOLUME ["/app/.data"]
